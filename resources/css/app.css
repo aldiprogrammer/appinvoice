@@ -1,0 +1,34 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+.react-select__menu-portal {
+    z-index: 9999 !important;
+}
+.react-select__menu-portal .react-select__menu {
+    background: #ffffff !important;
+    opacity: 1 !important;
+    border: 1px solid #d1d5db !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+}
+.react-select__menu-portal .react-select__menu-list {
+    background: #ffffff !important;
+    opacity: 1 !important;
+}
+.react-select__menu-portal .react-select__option {
+    background: #ffffff !important;
+    opacity: 1 !important;
+    color: #1f2937 !important;
+}
+.react-select__menu-portal .react-select__option--is-focused {
+    background: #ede9fe !important;
+    color: #7c3aed !important;
+}
+.react-select__menu-portal .react-select__option--is-selected {
+    background: #7c3aed !important;
+    color: #ffffff !important;
+}
