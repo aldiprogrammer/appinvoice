@@ -30,7 +30,7 @@
                         <table class="w-full text-[12px] leading-[15px] font-bold text-black">
                             <tr><td class="w-[20%] py-[0px] whitespace-nowrap">NO. INVOICE</td><td class="w-[10%] text-center py-[1px]">:</td><td class="py-[0px]">{{ $cs->kode_invoice }}</td></tr>
                             <tr><td class="py-[1px]">TANGGAL</td><td class="text-center py-[1px]">:</td><td class="py-[1px]">{{ date('d/m/Y', strtotime($cs->tanggal)) }}</td></tr>
-                            <tr><td class="py-[1px]">NO. PO</td><td class="text-center py-[1px]">:</td><td class="py-[1px]">{{ $cs->no_po }}</td></tr>
+                            @if(!empty($cs->no_po) && $cs->no_po != 0)<tr><td class="py-[1px]">NO. PO</td><td class="text-center py-[1px]">:</td><td class="py-[1px]">{{ $cs->no_po }}</td></tr>@endif
                             <tr><td class="py-[1px]">PENERIMA</td><td class="text-center py-[1px]">:</td><td class="py-[0px]">{{ $cs->customer }}</td></tr>
                             <tr><td class="py-[1px]">ALAMAT</td><td class="text-center py-[1px]">:</td><td class="py-[1px]">{{ $cs->customernew->alamat }}</td></tr>
                         </table>
@@ -93,7 +93,12 @@
                 <div class="mt-[6px] flex justify-between font-bold text-[12px]">
                     <div class="text-center w-1/4">Hormat Kami<br><br><br><br>@if(!empty($nama_setujui))<span class="">{{ $nama_setujui }}</span>@else(____________________)@endif</div>
                     <div class="text-center w-1/4">Penerima<br><br><br><br>(____________________)</div>
+                    
                 </div>
+
+                @if(!empty($cetak) && $cetak > 0)
+                    <div class="mt-[4px] text-left text-[11px] font-bold italic">Invoice Ini Merupakan Salinan (Copy {{ $cetak }}) dan Bukan Merupakan Invoice Asli</div>
+                @endif
             </div>
         </div>
         
@@ -115,7 +120,7 @@
                         <table class="w-full text-[12px] leading-[15px] font-bold text-black">
                             <tr><td class="w-[20%] py-[0px] whitespace-nowrap">NO. INVOICE</td><td class="w-[10%] text-center py-[1px]">:</td><td class="py-[0px]">{{ $cs->kode_invoice }}</td></tr>
                             <tr><td class="py-[1px]">TANGGAL</td><td class="text-center py-[1px]">:</td><td class="py-[1px]">{{ date('d/m/Y', strtotime($cs->tanggal)) }}</td></tr>
-                            <tr><td class="py-[1px]">NO. PO</td><td class="text-center py-[1px]">:</td><td class="py-[1px]">{{ $cs->no_po }}</td></tr>
+                            @if(!empty($cs->no_po) && $cs->no_po != 0)<tr><td class="py-[1px]">NO. PO</td><td class="text-center py-[1px]">:</td><td class="py-[1px]">{{ $cs->no_po }}</td></tr>@endif
                             <tr><td class="py-[1px]">PENERIMA</td><td class="text-center py-[1px]">:</td><td class="py-[0px]">{{ $cs->customer }}</td></tr>
                             <tr><td class="py-[1px]">ALAMAT</td><td class="text-center py-[1px]">:</td><td class="py-[1px]">{{ $cs->customernew->alamat }}</td></tr>
                         </table>
@@ -182,7 +187,12 @@
                 <div class="mt-[6px] flex justify-between font-bold text-[12px]">
                     <div class="text-center w-1/4">Hormat Kami<br><br><br><br>@if(!empty($nama_setujui))<span class="">{{ $nama_setujui }}</span>@else(____________________)@endif</div>
                     <div class="text-center w-1/4">Penerima<br><br><br><br>(____________________)</div>
+                    
                 </div>
+
+                @if(!empty($cetak) && $cetak > 0)
+                    <div class="mt-[4px] text-left text-[11px] font-bold italic">Invoice Ini Merupakan Salinan (Copy {{ $cetak }}) dan Bukan Merupakan Invoice Asli</div>
+                @endif
             </div>
         </div>
     </div>

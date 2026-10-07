@@ -31,11 +31,11 @@
                     </div>
                 </div>
                 <div style="display:flex;align-items:flex-start;justify-content:center">
-                    <div style="font-size:16px;font-weight:bold;text-decoration:underline;margin-top:8px">INVOICE</div>
+                    <div style="font-size:16px;font-weight:bold;text-decoration:underline;margin-top:8px">INVOICE ytyty</div>
                 </div>
                 <div>
                     <table style="width:100%;font-size:12px;line-height:15px;font-weight:bold;color:#000">
-                        <tr><td style="width:20%;padding:0;white-space:nowrap">NO. INVOICE rtrt</td><td style="width:10%;text-align:center;padding:1px 0">:</td><td style="padding:0">{{ $cs->kode_invoice }}</td></tr>
+                        <tr><td style="width:20%;padding:0;white-space:nowrap">NO. INVOICE</td><td style="width:10%;text-align:center;padding:1px 0">:</td><td style="padding:0">{{ $cs->kode_invoice }}</td></tr>
                         <tr><td style="padding:1px 0">TANGGAL</td><td style="text-align:center;padding:1px 0">:</td><td style="padding:1px 0">{{ date('d/m/Y', strtotime($cs->tanggal)) }}</td></tr>
                         <tr><td style="padding:1px 0">NO. PO</td><td style="text-align:center;padding:1px 0">:</td><td style="padding:1px 0">{{ $cs->no_po }}</td></tr>
                         <tr><td style="padding:1px 0">PENERIMA</td><td style="text-align:center;padding:1px 0">:</td><td style="padding:0">{{ $cs->customer }}</td></tr>
@@ -44,12 +44,12 @@
                 </div>
             </div>
 
-            <div style="margin-top:6px">
+            <div style="margin-top:3px">
                 <table class="rc-table">
                     <thead>
                         <tr>
                             <th style="width:5%">No</th>
-                            <th class="left" style="width:30%">Nama Barang</th>
+                            <th class="left" style="width:35%">Nama Barang</th>
                             <th class="left" style="width:12%">Kemasan</th>
                             <th class="right" style="width:10%">Jumlah Sak</th>
                             <th class="right" style="width:10%">Total KG</th>
@@ -80,17 +80,14 @@
                 </div>
             </div>
 
-            <div style="margin-top:4px;font-size:12px;font-weight:bold">
+            <div style="margin-top:2px;font-size:11px;font-weight:bold;letter-spacing:.3px">
                 <div style="font-weight:bold">Nomor Rekening :</div>
-                <table style="width:100%">
-                    <tr>
-                        <td width="54%">Bank BCA : 1909277777 a.n. PT Sinar Aneka Niaga</td>
-                        <td width="70%" style="text-align:right">Bank Mandiri : 1400087886686 a.n. PT Sinar Aneka Niaga</td>
-                    </tr>
+                <table style="letter-spacing:.3px">
+                    <tr><td width="54%">Bank BCA : 1909277777 a.n. PT Sinar Aneka Niaga</td><td width="70%" class="text-right">Bank Mandiri : 1400087886686 a.n. PT Sinar Aneka Niaga</td></tr>
                 </table>
             </div>
 
-            <div style="margin-top:5px;font-size:10px">
+            <div style="margin-top:2px;font-size:9px;letter-spacing:.3px">
                 <div style="font-weight:bold">Keterangan :</div>
                 <div style="font-weight:600">- Pembayaran dinyatakan LUNAS apabila dana telah masuk ke rekening kami.</div>
                 <div>- Barang yang sudah dibeli tidak dapat dikembalikan.</div>
@@ -103,10 +100,8 @@
             </div>
         </div>
     </div>
-    
-    
-    @if($total_tambahan != 0)
 
+    @if($total_tambahan != 0)
     <div class="rc-page">
         <div>
             <div class="rc-header">
@@ -130,7 +125,7 @@
                 </div>
             </div>
 
-            <div style="margin-top:6px">
+            <div style="margin-top:3px">
                 <table class="rc-table">
                     <thead>
                         <tr>
@@ -146,9 +141,9 @@
                     <tbody>
                         <?php $no = 1; ?>
                         @foreach ($inv as $i => $item)
-                         @if($item->harga_tambahan != 0)
+                            @if($item->harga_tambahan != 0)
                             <tr>
-                                <td class="c">{{ $no++}}</td>
+                                <td class="c">{{ $no++ }}</td>
                                 <td class="l">Tambahan Harga {{ $item->produk }}</td>
                                 <td class="l">{{ $item->kemasan }} Kg</td>
                                 <td class="r">{{ $item->jml_sak }}</td>
@@ -169,19 +164,16 @@
                 </div>
             </div>
 
-            <div style="margin-top:4px;font-size:12px;font-weight:bold">
+            <div style="margin-top:2px;font-size:11px;font-weight:bold;letter-spacing:.3px">
                 <div style="font-weight:bold">Nomor Rekening :</div>
-                <table style="width:100%">
-                    <tr>
-                        <td width="54%">Bank BCA : 1909277777 a.n. PT Sinar Aneka Niaga</td>
-                        <td width="70%" style="text-align:right">Bank Mandiri : 1400087886686 a.n. PT Sinar Aneka Niaga</td>
-                    </tr>
+                <table style="letter-spacing:.3px">
+                    <tr><td width="54%">Bank BCA : 1909277777 a.n. PT Sinar Aneka Niaga</td><td width="70%" class="text-right">Bank Mandiri : 1400087886686 a.n. PT Sinar Aneka Niaga</td></tr>
                 </table>
             </div>
 
-            <div style="margin-top:5px;font-size:10px">
+            <div style="margin-top:2px;font-size:9px;letter-spacing:.3px">
                 <div style="font-weight:bold">Keterangan :</div>
-                <div style="font-weight:600">- Pembayaran dinyatakan LUNAS apabila dana telah masuk ke rekining kami.</div>
+                <div style="font-weight:600">- Pembayaran dinyatakan LUNAS apabila dana telah masuk ke rekening kami.</div>
                 <div>- Barang yang sudah dibeli tidak dapat dikembalikan.</div>
                 <div>- Cek / Giro hanya tertuju pada Bank BCA.</div>
             </div>

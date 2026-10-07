@@ -86,10 +86,13 @@
                      <div class="text-center w-1/4">TELI<br><br><br><br>(____________________)</div>
 
                      <div class="text-center w-1/4">HORMAT KAMI<br><br><br><br>@if(!empty($nama_setujui))<span class="">{{ $nama_setujui }}</span>@else(____________________)@endif
-                        @if(!empty($cetak) && $cetak > 0)<br><span class="text-[11px]">Copy {{ $cetak }}</span>@endif
                     </div>
                    
                 </div>
+
+                @if(!empty($cetak) && $cetak > 0)
+                    <div class="mt-[4px] text-left text-[11px] font-bold italic">Surat Jalan Ini Merupakan Salinan (Copy {{ $cetak }}) dan Bukan Merupakan Surat Jalan Asli</div>
+                @endif
             </div>
         </div>
     </div>

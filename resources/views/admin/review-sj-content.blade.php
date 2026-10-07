@@ -29,7 +29,6 @@
                     <div style="font-size:13px;font-weight:bold;line-height:1.3">
                         JL. SETIA UJUNG NO. 38<br>MEDAN – BINJAI KM 13,5<br>KAB. DELI SERDANG<br>NO HP : 081367707788
                     </div>
-                    
                 </div>
                 <div style="display:flex;align-items:flex-start;justify-content:center">
                     <div style="font-size:16px;font-weight:bold;text-decoration:underline;margin-top:8px">SURAT JALAN</div>
@@ -40,13 +39,13 @@
                         <tr><td style="padding:1px 0">TANGGAL</td><td style="text-align:center;padding:1px 0">:</td><td style="padding:1px 0">{{ date('d/m/Y', strtotime($cs->tanggal)) }}</td></tr>
                         <tr><td style="padding:1px 0">PENERIMA</td><td style="text-align:center;padding:1px 0">:</td><td style="padding:0">{{ $cs->customer }}</td></tr>
                         <tr><td style="padding:1px 0">ALAMAT</td><td style="text-align:center;padding:1px 0">:</td><td style="padding:1px 0">{{ $cs->alamat }}</td></tr>
-                        {{-- <tr><td style="padding:1px 0">NO. KENDARAAN</td><td style="text-align:center;padding:1px 0">:</td><td style="padding:1px 0"></td></tr> --}}
                     </table>
                 </div>
             </div>
-                    <div style="font-style: italic; margin-top : 8px">
-                       Dengan nomor kendaraan <b>{{ $cs->nomor_kendaraan ?? '-' }}</b> Kami kirimkan barang-barang tersebut di bawah ini :
-                    </div>
+
+            <div style="font-style: italic; margin-top:8px">
+                Dengan nomor kendaraan <b>{{ $cs->nomor_kendaraan ?? '-' }}</b> Kami kirimkan barang-barang tersebut di bawah ini :
+            </div>
 
             <div style="margin-top:6px">
                 <table class="rc-table">
@@ -87,8 +86,8 @@
             </div>
 
             <div class="rc-ttd">
-                 <div>PENERIMA<br><br><br><br>(____________________)</div>
-                  <div>TELI<br><br><br><br>(____________________)</div>
+                <div>PENERIMA<br><br><br><br>(____________________)</div>
+                <div>TELI<br><br><br><br>(____________________)</div>
                 <div>HORMAT KAMI<br><br><br><br>@if(!empty($nama_setujui))<span style="font-weight:bold">{{ $nama_setujui }}</span>@else(____________________)@endif</div>
             </div>
         </div>

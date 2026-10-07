@@ -10,70 +10,86 @@ export default function Create({ customer, produk, no_sj, sj, listkode, total })
     return (
         <AppLayout title="Surat Jalan">
             <Head title="Buat Surat Jalan" />
-            <div className="card bg-base-100 border border-base-300 shadow-sm p-6">
-                <div className="flex items-center justify-between mb-6">
+            <div className="card bg-white border shadow-sm p-4" style={{ borderColor: '#e5e7eb' }}>
+                <div className="d-flex align-items-center justify-content-between mb-4">
                     <div>
-                        <h1 className="text-2xl font-bold">Surat Jalan</h1>
-                        <p className="text-sm text-base-content/50">Buat surat jalan baru</p>
+                        <h1 className="font-weight-bold" style={{ fontSize: '1.5rem' }}>Surat Jalan</h1>
+                        <p className="small text-muted">Buat surat jalan baru</p>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <SJForm
-                        customer={customer}
-                        produk={produk}
-                        no_sj={no_sj}
-                        listkode={listkode}
-                    />
+                <div className="row">
+                    <div className="col-12 col-lg-6">
+                        <SJForm
+                            customer={customer}
+                            produk={produk}
+                            no_sj={no_sj}
+                            listkode={listkode}
+                        />
+                    </div>
 
-                    <ItemList
-                        sj={sj}
-                        listkode={listkode}
-                        total={total}
-                        onDelete={(item) => setDeleteItem(item)}
-                        onSave={() => setSaveModal(true)}
-                    />
+                    <div className="col-12 col-lg-6">
+                        <ItemList
+                            sj={sj}
+                            listkode={listkode}
+                            total={total}
+                            onDelete={(item) => setDeleteItem(item)}
+                            onSave={() => setSaveModal(true)}
+                        />
+                    </div>
                 </div>
             </div>
 
             {deleteItem && (
-                <dialog className="modal modal-open">
-                    <div className="modal-box text-center">
-                        <div className="w-20 h-20 rounded-full bg-error/10 flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-8 h-8 text-error" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                        </div>
-                        <h3 className="font-bold text-lg">Hapus data</h3>
-                        <p className="text-base-content/60 mt-2">Apakah anda ingin menghapus data ini?</p>
-                        <div className="modal-action justify-center">
-                            <button className="btn btn-ghost" onClick={() => setDeleteItem(null)}>Batal</button>
-                            <button className="btn btn-error" onClick={(e) => { e.stopPropagation(); router.delete(`/suratjalan/${deleteItem.id}`, { onFinish: () => setDeleteItem(null) }); }}>Hapus</button>
+                <div className="modal d-block" style={{ zIndex: 1050, background: 'rgba(0,0,0,.5)', overflowY: 'auto' }} onClick={() => setDeleteItem(null)}>
+                    <div className="modal-dialog modal-dialog-centered" role="document" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title font-weight-bold">Hapus data</h5>
+                                <button type="button" className="close" onClick={() => setDeleteItem(null)}><span>&times;</span></button>
+                            </div>
+                            <div className="modal-body text-center">
+                                <div className="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: 80, height: 80, background: 'rgba(220,53,69,.1)' }}>
+                                    <i className="fas fa-trash-alt" style={{ color: '#dc3545', fontSize: '2rem' }} />
+                                </div>
+                                <p className="text-muted" style={{ marginTop: '.5rem' }}>Apakah anda ingin menghapus data ini?</p>
+                            </div>
+                            <div className="modal-footer justify-content-center">
+                                <button className="btn btn-light" onClick={() => setDeleteItem(null)}>Batal</button>
+                                <button className="btn btn-danger" onClick={(e) => { e.stopPropagation(); router.delete(`/suratjalan/${deleteItem.id}`, { onFinish: () => setDeleteItem(null) }); }}>Hapus</button>
+                            </div>
                         </div>
                     </div>
-                    <div className="modal-backdrop" onClick={() => setDeleteItem(null)} />
-                </dialog>
+                </div>
             )}
 
             {saveModal && listkode && (
-                <dialog className="modal modal-open">
-                    <div className="modal-box text-center">
-                        <div className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-8 h-8 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
-                        </div>
-                        <h3 className="font-bold text-lg">Simpan Surat Jalan</h3>
-                        <p className="text-base-content/60 mt-2">Apakah anda ingin menyimpan surat jalan ini?</p>
-                        <div className="modal-action justify-center">
-                            <button className="btn btn-ghost" onClick={() => setSaveModal(false)}>Batal</button>
-                            <button className="btn btn-success" onClick={() => {
-                                router.post('/suratjalan-simpan', {
-                                    no_sj: listkode.no_sj,
-                                    status_cetak: 0,
-                                });
-                                setSaveModal(false);
-                            }}>Simpan</button>
+                <div className="modal d-block" style={{ zIndex: 1050, background: 'rgba(0,0,0,.5)', overflowY: 'auto' }} onClick={() => setSaveModal(false)}>
+                    <div className="modal-dialog modal-dialog-centered" role="document" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title font-weight-bold">Simpan Surat Jalan</h5>
+                                <button type="button" className="close" onClick={() => setSaveModal(false)}><span>&times;</span></button>
+                            </div>
+                            <div className="modal-body text-center">
+                                <div className="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: 80, height: 80, background: 'rgba(40,167,69,.1)' }}>
+                                    <i className="fas fa-save" style={{ color: '#28a745', fontSize: '2rem' }} />
+                                </div>
+                                <p className="text-muted" style={{ marginTop: '.5rem' }}>Apakah anda ingin menyimpan surat jalan ini?</p>
+                            </div>
+                            <div className="modal-footer justify-content-center">
+                                <button className="btn btn-light" onClick={() => setSaveModal(false)}>Batal</button>
+                                <button className="btn btn-success" onClick={() => {
+                                    router.post('/suratjalan-simpan', {
+                                        no_sj: listkode.no_sj,
+                                        status_cetak: 0,
+                                    });
+                                    setSaveModal(false);
+                                }}>Simpan</button>
+                            </div>
                         </div>
                     </div>
-                    <div className="modal-backdrop" onClick={() => setSaveModal(false)} />
-                </dialog>
+                </div>
             )}
         </AppLayout>
     );
@@ -129,19 +145,19 @@ function SJForm({ customer, produk, no_sj, listkode }) {
     };
 
     return (
-        <div className="bg-primary/5 rounded-xl p-4 border border-primary/20">
-            <h5 className="font-bold flex items-center gap-2 mb-3">
-                <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+        <div className="rounded border p-3" style={{ background: 'rgba(0,123,255,.05)', borderColor: 'rgba(0,123,255,.2)', borderRadius: '.75rem' }}>
+            <h5 className="font-weight-bold d-flex align-items-center mb-3" style={{ columnGap: '.5rem' }}>
+                <i className="fas fa-file-invoice text-primary" />
                 Form Surat Jalan #{no_sj}
             </h5>
             <form onSubmit={submit}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div>
-                        <label className="label"><span className="label-text text-xs font-semibold uppercase text-black">No Surat Jalan</span></label>
-                        <input type="text" className="input input-bordered w-full input-sm" value={no_sj} readOnly />
+                <div className="row">
+                    <div className="col-12 col-md-6 form-group">
+                        <label className="small font-weight-bold text-uppercase">No Surat Jalan</label>
+                        <input type="text" className="form-control form-control-sm" value={no_sj} readOnly />
                     </div>
-                    <div>
-                        <label className="label"><span className="label-text text-xs font-semibold uppercase text-black">Customer</span></label>
+                    <div className="col-12 col-md-6 form-group">
+                        <label className="small font-weight-bold text-uppercase">Customer</label>
                         <SearchableSelect
                             options={customer.map((c) => ({ value: c.id, label: c.nama }))}
                             value={data.customer}
@@ -149,16 +165,16 @@ function SJForm({ customer, produk, no_sj, listkode }) {
                             placeholder="Pilih Customer..."
                         />
                     </div>
-                    <div className="md:col-span-2">
-                        <label className="label"><span className="label-text text-xs font-semibold uppercase text-black">Alamat</span></label>
-                        <textarea className="textarea textarea-bordered w-full" rows={2} value={alamat} readOnly />
+                    <div className="col-12 form-group">
+                        <label className="small font-weight-bold text-uppercase">Alamat</label>
+                        <textarea className="form-control" rows={2} value={alamat} readOnly />
                     </div>
-                    <div className="md:col-span-2">
-                        <label className="label"><span className="label-text text-xs font-semibold uppercase text-black">Nomor Kendaraan</span></label>
-                        <input type="text" className="input input-bordered w-full input-sm" name="nomor_kendaraan" value={data.nomor_kendaraan} onChange={(e) => setData('nomor_kendaraan', e.target.value)} placeholder="Masukkan nomor kendaraan" />
+                    <div className="col-12 form-group">
+                        <label className="small font-weight-bold text-uppercase">Nomor Kendaraan</label>
+                        <input type="text" className="form-control form-control-sm" name="nomor_kendaraan" value={data.nomor_kendaraan} onChange={(e) => setData('nomor_kendaraan', e.target.value)} placeholder="Masukkan nomor kendaraan" />
                     </div>
-                    <div>
-                        <label className="label"><span className="label-text text-xs font-semibold uppercase text-black">Produk</span></label>
+                    <div className="col-12 col-md-6 form-group">
+                        <label className="small font-weight-bold text-uppercase">Produk</label>
                         <SearchableSelect
                             options={produk.map((p) => ({ value: p.id, label: `${p.produk} - ${p.kemasan}kg (${p.kualitas})` }))}
                             value={data.produk}
@@ -166,32 +182,36 @@ function SJForm({ customer, produk, no_sj, listkode }) {
                             placeholder="Pilih Produk..."
                         />
                     </div>
-                    <div>
-                        <label className="label"><span className="label-text text-xs font-semibold uppercase text-black">Kemasan</span></label>
-                        <input type="text" className="input input-bordered w-full input-sm" value={kemasan} readOnly />
+                    <div className="col-12 col-md-6 form-group">
+                        <label className="small font-weight-bold text-uppercase">Kemasan</label>
+                        <input type="text" className="form-control form-control-sm" value={kemasan} readOnly />
                     </div>
-                    <div>
-                        <label className="label"><span className="label-text text-xs font-semibold uppercase text-black">Harga/kg</span></label>
-                        <input type="text" className="input input-bordered w-full input-sm" name="harga" value={data.harga} onChange={(e) => setData('harga', e.target.value)} required />
+                    <div className="col-12 col-md-6 form-group">
+                        <label className="small font-weight-bold text-uppercase">Harga/kg</label>
+                        <input type="text" className="form-control form-control-sm" name="harga" value={data.harga} onChange={(e) => setData('harga', e.target.value)} required />
                     </div>
-                    <div>
-                        <label className="label"><span className="label-text text-xs font-semibold uppercase text-black">Jumlah Sak</span></label>
-                        <input type="number" className="input input-bordered w-full input-sm" name="jml_sak" value={data.jml_sak} onChange={(e) => setData('jml_sak', e.target.value)} required />
+                    <div className="col-12 col-md-6 form-group">
+                        <label className="small font-weight-bold text-uppercase">Jumlah Sak</label>
+                        <input type="number" className="form-control form-control-sm" name="jml_sak" value={data.jml_sak} onChange={(e) => setData('jml_sak', e.target.value)} required />
                     </div>
-                    <div>
-                        <label className="label"><span className="label-text text-xs font-semibold uppercase text-black">Total KG</span></label>
-                        <input type="text" className="input input-bordered w-full input-sm" value={totalKg} readOnly />
+                    <div className="col-12 col-md-6 form-group">
+                        <label className="small font-weight-bold text-uppercase">Total KG</label>
+                        <input type="text" className="form-control form-control-sm" value={totalKg} readOnly />
                     </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3 mt-4">
-                    <button type="submit" disabled={processing} className="btn btn-primary btn-block">
-                        {processing ? <span className="loading loading-spinner loading-sm" /> : <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>}
-                        Tambah data
-                    </button>
-                    <button type="button" className="btn btn-ghost btn-block" onClick={() => window.location.reload()}>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                        Refresh
-                    </button>
+                <div className="row mt-3">
+                    <div className="col-6">
+                        <button type="submit" disabled={processing} className="btn btn-primary btn-block">
+                            {processing ? <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true" /> : <i className="fas fa-plus mr-2" />}
+                            Tambah data
+                        </button>
+                    </div>
+                    <div className="col-6">
+                        <button type="button" className="btn btn-light btn-block" onClick={() => window.location.reload()}>
+                            <i className="fas fa-sync-alt mr-2" />
+                            Refresh
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -200,28 +220,28 @@ function SJForm({ customer, produk, no_sj, listkode }) {
 
 function ItemList({ sj, listkode, total, onDelete, onSave }) {
     return (
-        <div className="bg-primary/5 rounded-xl p-4 border border-primary/20">
-            <h5 className="font-bold flex items-center gap-2 mb-3">
-                <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+        <div className="rounded border p-3" style={{ background: 'rgba(0,123,255,.05)', borderColor: 'rgba(0,123,255,.2)', borderRadius: '.75rem' }}>
+            <h5 className="font-weight-bold d-flex align-items-center mb-3" style={{ columnGap: '.5rem' }}>
+                <i className="fas fa-list text-primary" />
                 Daftar Item
             </h5>
 
-            <div className="overflow-x-auto rounded-xl border bg-white">
+            <div className="table-responsive rounded border bg-white">
                 {listkode && (
-                    <div className="px-3 py-2 bg-primary/5 border-b">
-                        <div className="flex justify-between text-sm font-bold">
-                            <span className="text-primary">NO SJ : <span className="font-bold">{listkode.no_sj}</span></span>
+                    <div className="border-bottom px-3 py-2" style={{ background: 'rgba(0,123,255,.05)' }}>
+                        <div className="d-flex justify-content-between small font-weight-bold">
+                            <span className="text-primary">NO SJ : <span className="font-weight-bold">{listkode.no_sj}</span></span>
                             <span className="text-primary">TANGGAL : {listkode.tanggal}</span>
                         </div>
-                        <div className="text-xs text-base-content/50">
-                            Customer : <span className="font-bold">{listkode.customer}</span>
-                            {listkode.nomor_kendaraan && <span className="ml-3">Kendaraan : <span className="font-bold">{listkode.nomor_kendaraan}</span></span>}
+                        <div className="text-muted" style={{ fontSize: '.75rem' }}>
+                            Customer : <span className="font-weight-bold">{listkode.customer}</span>
+                            {listkode.nomor_kendaraan && <span className="ml-3">Kendaraan : <span className="font-weight-bold">{listkode.nomor_kendaraan}</span></span>}
                         </div>
                     </div>
                 )}
-                <table className="table table-sm w-full mb-0">
-                    <thead>
-                        <tr className="bg-primary text-white">
+                <table className="table table-sm mb-0">
+                    <thead style={{ background: '#3b82f6' }}>
+                        <tr>
                             <th className="text-white">#</th>
                             <th className="text-white">Barang</th>
                             <th className="text-white">Jml sak</th>
@@ -232,16 +252,16 @@ function ItemList({ sj, listkode, total, onDelete, onSave }) {
                     </thead>
                     <tbody>
                         {sj.length === 0 ? (
-                            <tr><td colSpan={6} className="text-center py-6 text-base-content/40">Belum ada item</td></tr>
+                            <tr><td colSpan={6} className="text-center text-muted" style={{ padding: '1.5rem 0' }}>Belum ada item</td></tr>
                         ) : sj.map((item, idx) => (
                             <tr key={item.id}>
                                 <th>{idx + 1}</th>
-                                <td className="font-bold">{item.produknew?.produk}-{item.produknew?.kemasan}Kg</td>
+                                <td className="font-weight-bold">{item.produknew?.produk}-{item.produknew?.kemasan}Kg</td>
                                 <td>{item.jml_sak}</td>
                                 <td>Rp {Number(item.harga).toLocaleString('id-ID')}</td>
                                 <td>{item.total_kg} kg</td>
                                 <td>
-                                    <button className="btn btn-error btn-xs" onClick={() => onDelete(item)}>Hapus</button>
+                                    <button className="btn btn-danger btn-sm" onClick={() => onDelete(item)}>Hapus</button>
                                 </td>
                             </tr>
                         ))}
@@ -250,19 +270,17 @@ function ItemList({ sj, listkode, total, onDelete, onSave }) {
             </div>
 
             {listkode && (
-                <div className="mt-4">
-                    <div className="bg-white rounded-xl p-3 border mb-3">
-                        <div className="flex justify-between items-center">
-                            <span className="text-sm text-base-content/50">Total KG</span>
-                            <h3 className="text-lg font-bold text-primary">{Number(total).toLocaleString('id-ID')} kg</h3>
+                <div className="mt-3">
+                    <div className="bg-white rounded border p-3 mb-3" style={{ borderRadius: '.75rem' }}>
+                        <div className="d-flex justify-content-between align-items-center">
+                            <span className="small text-muted">Total KG</span>
+                            <h3 className="font-weight-bold text-primary" style={{ fontSize: '1.125rem' }}>{Number(total).toLocaleString('id-ID')} kg</h3>
                         </div>
                     </div>
-                    <div className="grid grid-cols-1 gap-3">
-                        <button className="btn btn-success btn-block" onClick={onSave}>
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
-                            SIMPAN
-                        </button>
-                    </div>
+                    <button className="btn btn-success btn-block" onClick={onSave}>
+                        <i className="fas fa-save mr-2" />
+                        SIMPAN
+                    </button>
                 </div>
             )}
         </div>

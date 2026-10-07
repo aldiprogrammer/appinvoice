@@ -23,9 +23,9 @@ export default function Index({ inventaris, nextKode }) {
     const kondisiBadge = (k) => {
         switch (k) {
             case 'Baik': return 'badge-success';
-            case 'Rusak': return 'badge-error';
+            case 'Rusak': return 'badge-danger';
             case 'Perbaikan': return 'badge-warning';
-            default: return 'badge-ghost';
+            default: return 'badge-light';
         }
     };
 
@@ -65,43 +65,43 @@ export default function Index({ inventaris, nextKode }) {
     return (
         <AppLayout title="Inventaris">
             <Head title="Inventaris" />
-            <div className="card bg-base-100 border border-base-300 shadow-sm p-6">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
+            <div className="card bg-white border shadow-sm p-4" style={{ borderColor: '#e5e7eb' }}>
+                <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between mb-4" style={{ gap: '.75rem' }}>
                     <div>
-                        <h1 className="text-2xl font-bold">Data Inventaris</h1>
-                        <p className="text-sm text-base-content/50">Kelola data inventaris barang</p>
+                        <h1 className="font-weight-bold" style={{ fontSize: '1.5rem' }}>Data Inventaris</h1>
+                        <p className="small text-muted">Kelola data inventaris barang</p>
                     </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                        <button className="btn btn-secondary gap-2" disabled={selected.size === 0} onClick={handlePrint}>
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                    <div className="d-flex flex-wrap align-items-center" style={{ gap: '.5rem' }}>
+                        <button className="btn btn-secondary" disabled={selected.size === 0} onClick={handlePrint}>
+                            <i className="fas fa-print mr-2" />
                             Cetak Label
-                            {selected.size > 0 && <span className="badge badge-ghost badge-sm">({selected.size})</span>}
+                            {selected.size > 0 && <span className="badge badge-light ml-1">({selected.size})</span>}
                         </button>
-                        <button className="btn btn-primary gap-2" onClick={() => setAddOpen(true)}>
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                        <button className="btn btn-primary" onClick={() => setAddOpen(true)}>
+                            <i className="fas fa-plus mr-2" />
                             Tambah Barang
                         </button>
                     </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-                    <input type="text" placeholder="Cari barang..." className="input input-bordered w-full max-w-xs" value={search} onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }} />
+                <div className="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between mb-3" style={{ gap: '.75rem' }}>
+                    <input type="text" placeholder="Cari barang..." className="form-control" style={{ maxWidth: '20rem' }} value={search} onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }} />
                     {selected.size > 0 && (
-                        <div className="flex items-center gap-2 text-sm text-base-content/60">
-                            <span className="badge badge-primary badge-sm">{selected.size} dipilih</span>
-                            <button className="btn btn-ghost btn-xs" onClick={() => setSelected(new Set())}>Batal semua</button>
+                        <div className="d-flex align-items-center small text-muted" style={{ gap: '.5rem' }}>
+                            <span className="badge badge-primary">{selected.size} dipilih</span>
+                            <button className="btn btn-light btn-sm" onClick={() => setSelected(new Set())}>Batal semua</button>
                         </div>
                     )}
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="table table-zebra w-full">
-                        <thead>
-                            <tr className="bg-primary text-white">
-                                <th className="text-white w-10">
-                                    <input type="checkbox" className="checkbox checkbox-sm border-white/40" checked={allFilteredSelected} onChange={toggleAll} title="Tandai semua" />
+                <div className="table-responsive">
+                    <table className="table table-striped table-sm inventaris-table">
+                        <thead style={{ background: '#3b82f6' }}>
+                            <tr>
+                                <th className="text-white text-nowrap" style={{ width: 90 }}>
+                                    <span className="mr-1">No</span>
+                                    <input type="checkbox" className="form-check-input position-static" checked={allFilteredSelected} onChange={toggleAll} title="Tandai semua" />
                                 </th>
-                                <th className="text-white">No</th>
                                 <th className="text-white">Kode Barang</th>
                                 <th className="text-white">Nama Barang</th>
                                 <th className="text-white">Tanggal Masuk</th>
@@ -112,25 +112,25 @@ export default function Index({ inventaris, nextKode }) {
                         </thead>
                         <tbody>
                             {paginated.length === 0 ? (
-                                <tr><td colSpan={8} className="text-center py-8 text-base-content/40">Tidak ada data</td></tr>
+                                <tr><td colSpan={7} className="text-center" style={{ padding: '2rem 0', color: 'rgba(0,0,0,.4)' }}>Tidak ada data</td></tr>
                             ) : paginated.map((item, idx) => (
-                                <tr key={item.id} className={selected.has(item.id) ? 'bg-primary/10' : ''}>
-                                    <td>
-                                        <input type="checkbox" className="checkbox checkbox-sm" checked={selected.has(item.id)} onChange={() => toggleItem(item.id)} />
-                                    </td>
-                                    <th>{(currentPage - 1) * perPage + idx + 1}</th>
-                                    <td><span className="badge badge-primary badge-sm">{item.kode_barang}</span></td>
-                                    <td className="font-bold">{item.nama_barang}</td>
+                                <tr key={item.id} className={selected.has(item.id) ? 'table-primary' : ''}>
+                                    <th className="text-nowrap font-weight-normal">
+                                        <input type="checkbox" className="form-check-input position-static" style={{ marginRight: '6px' }} checked={selected.has(item.id)} onChange={() => toggleItem(item.id)} />
+                                        {(currentPage - 1) * perPage + idx + 1}
+                                    </th>
+                                    <td><span className="badge badge-primary">{item.kode_barang}</span></td>
+                                    <td className="font-weight-bold">{item.nama_barang}</td>
                                     <td>{formatDate(item.tanggal_masuk)}</td>
-                                    <td><span className={`badge ${kondisiBadge(item.kondisi)} badge-sm`}>{item.kondisi}</span></td>
+                                    <td><span className={`badge ${kondisiBadge(item.kondisi)}`}>{item.kondisi}</span></td>
                                     <td>{item.letak}</td>
                                     <td>
-                                        <div className="flex justify-center gap-1">
-                                            <button className="btn btn-primary btn-xs" onClick={() => setEditItem(item)}>
-                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                        <div className="d-flex justify-content-center" style={{ gap: '.25rem' }}>
+                                            <button className="btn btn-primary btn-sm" onClick={() => setEditItem(item)}>
+                                                <i className="fas fa-pencil-alt" />
                                             </button>
-                                            <button className="btn btn-error btn-xs" onClick={() => setDeleteItem(item)}>
-                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                            <button className="btn btn-danger btn-sm" onClick={() => setDeleteItem(item)}>
+                                                <i className="fas fa-trash-alt" />
                                             </button>
                                         </div>
                                     </td>
@@ -141,15 +141,23 @@ export default function Index({ inventaris, nextKode }) {
                 </div>
 
                 {totalPages > 1 && (
-                    <div className="flex justify-between items-center mt-4">
-                        <span className="text-sm text-base-content/50">Menampilkan {(currentPage-1)*perPage+1}-{Math.min(currentPage*perPage, filtered.length)} dari {filtered.length} data</span>
-                        <div className="join">
-                            <button className="join-item btn btn-sm" disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}>«</button>
-                            {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => (
-                                <button key={i} className={`join-item btn btn-sm ${currentPage === i+1 ? 'btn-primary' : ''}`} onClick={() => setCurrentPage(i+1)}>{i+1}</button>
-                            ))}
-                            <button className="join-item btn btn-sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(currentPage + 1)}>»</button>
-                        </div>
+                    <div className="d-flex justify-content-between align-items-center mt-3">
+                        <span className="small text-muted">Menampilkan {(currentPage-1)*perPage+1}-{Math.min(currentPage*perPage, filtered.length)} dari {filtered.length} data</span>
+                        <nav>
+                            <ul className="pagination pagination-sm mb-0">
+                                <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                    <button className="page-link" disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}>«</button>
+                                </li>
+                                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => (
+                                    <li key={i} className={`page-item ${currentPage === i+1 ? 'active' : ''}`}>
+                                        <button className="page-link" onClick={() => setCurrentPage(i+1)}>{i+1}</button>
+                                    </li>
+                                ))}
+                                <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                                    <button className="page-link" disabled={currentPage === totalPages} onClick={() => setCurrentPage(currentPage + 1)}>»</button>
+                                </li>
+                            </ul>
+                        </nav>
                     </div>
                 )}
             </div>
@@ -158,21 +166,27 @@ export default function Index({ inventaris, nextKode }) {
             {editItem && <InventarisModal item={editItem} onClose={() => setEditItem(null)} />}
 
             {deleteItem && (
-                <dialog className="modal modal-open">
-                    <div className="modal-box text-center">
-                        <div className="w-20 h-20 rounded-full bg-error/10 flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-8 h-8 text-error" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                        </div>
-                        <h3 className="font-bold text-lg">Hapus Barang</h3>
-                        <p className="text-base-content/60 mt-2">Apakah anda yakin ingin menghapus data ini?</p>
-                        <p className="font-bold text-lg mt-1">{deleteItem.nama_barang}</p>
-                        <div className="modal-action justify-center">
-                            <button className="btn btn-ghost" onClick={() => setDeleteItem(null)}>Batal</button>
-                            <button className="btn btn-error" onClick={(e) => { e.stopPropagation(); router.delete(`/inventaris/${deleteItem.id}`, { onFinish: () => setDeleteItem(null) }); }}>Hapus</button>
+                <div className="modal d-block" style={{ zIndex: 1050, background: 'rgba(0,0,0,.5)', overflowY: 'auto' }} onClick={() => setDeleteItem(null)}>
+                    <div className="modal-dialog modal-dialog-centered" role="document" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title font-weight-bold">Hapus Barang</h5>
+                                <button type="button" className="close" onClick={() => setDeleteItem(null)}><span>&times;</span></button>
+                            </div>
+                            <div className="modal-body text-center">
+                                <div className="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: 80, height: 80, background: 'rgba(220,53,69,.1)' }}>
+                                    <i className="fas fa-trash-alt" style={{ color: '#dc3545', fontSize: '2rem' }} />
+                                </div>
+                                <p className="text-muted" style={{ marginTop: '.5rem' }}>Apakah anda yakin ingin menghapus data ini?</p>
+                                <p className="font-weight-bold" style={{ fontSize: '1.125rem', marginTop: '.25rem' }}>{deleteItem.nama_barang}</p>
+                            </div>
+                            <div className="modal-footer justify-content-center">
+                                <button className="btn btn-light" onClick={() => setDeleteItem(null)}>Batal</button>
+                                <button className="btn btn-danger" onClick={(e) => { e.stopPropagation(); router.delete(`/inventaris/${deleteItem.id}`, { onFinish: () => setDeleteItem(null) }); }}>Hapus</button>
+                            </div>
                         </div>
                     </div>
-                    <div className="modal-backdrop" onClick={() => setDeleteItem(null)} />
-                </dialog>
+                </div>
             )}
         </AppLayout>
     );
@@ -198,55 +212,57 @@ function InventarisModal({ item = null, onClose, nextKode }) {
     };
 
     return (
-        <dialog className="modal modal-open">
-            <div className="modal-box">
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
-                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+        <div className="modal d-block" style={{ zIndex: 1050, background: 'rgba(0,0,0,.5)', overflowY: 'auto' }} onClick={onClose}>
+            <div className="modal-dialog modal-dialog-centered" role="document" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-content">
+                    <div className="modal-header d-flex align-items-center" style={{ gap: '.75rem' }}>
+                        <div className="rounded d-flex align-items-center justify-content-center" style={{ width: 40, height: 40, background: '#007bff' }}>
+                            <i className="fas fa-box text-white" />
+                        </div>
+                        <div>
+                            <h5 className="modal-title font-weight-bold">{isEdit ? 'Edit' : 'Tambah'} Inventaris</h5>
+                            <p className="small text-muted mb-0">{isEdit ? 'Ubah data barang' : 'Masukkan data barang baru'}</p>
+                        </div>
+                        <button type="button" className="close ml-auto" onClick={onClose}><span>&times;</span></button>
                     </div>
-                    <div>
-                        <h3 className="font-bold text-lg">{isEdit ? 'Edit' : 'Tambah'} Inventaris</h3>
-                        <p className="text-sm text-base-content/50">{isEdit ? 'Ubah data barang' : 'Masukkan data barang baru'}</p>
+                    <div className="modal-body">
+                        <form onSubmit={submit}>
+                            <div className="form-group">
+                                <label className="font-weight-bold">Kode Barang <span className="badge badge-light ml-1">otomatis</span></label>
+                                <input type="text" className="form-control" style={{ background: '#f0f2f5' }} placeholder="Kode barang" value={data.kode_barang} onChange={(e) => setData('kode_barang', e.target.value)} readOnly />
+                            </div>
+                            <div className="form-group">
+                                <label className="font-weight-bold">Nama Barang</label>
+                                <input type="text" className="form-control" placeholder="Nama barang" value={data.nama_barang} onChange={(e) => setData('nama_barang', e.target.value)} required />
+                            </div>
+                            <div className="form-group">
+                                <label className="font-weight-bold">Tanggal Masuk</label>
+                                <input type="date" className="form-control" value={data.tanggal_masuk} onChange={(e) => setData('tanggal_masuk', e.target.value)} required />
+                            </div>
+                            <div className="form-group">
+                                <label className="font-weight-bold">Kondisi Barang</label>
+                                <select className="form-control" value={data.kondisi} onChange={(e) => setData('kondisi', e.target.value)} required>
+                                    <option value="" disabled>Pilih kondisi</option>
+                                    <option>Baik</option>
+                                    <option>Perbaikan</option>
+                                    <option>Rusak</option>
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label className="font-weight-bold">Letak Barang</label>
+                                <input type="text" className="form-control" placeholder="Letak barang" value={data.letak} onChange={(e) => setData('letak', e.target.value)} required />
+                            </div>
+                            <div className="modal-footer px-0 pb-0">
+                                <button type="button" className="btn btn-light" onClick={onClose}>Batal</button>
+                                <button type="submit" disabled={processing} className="btn btn-primary">
+                                    {processing && <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true" />}
+                                    Simpan
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
-                <form onSubmit={submit}>
-                    <div className="space-y-3">
-                        <div>
-                            <label className="label"><span className="label-text font-medium">Kode Barang <span className="badge badge-ghost badge-xs ml-1">otomatis</span></span></label>
-                            <input type="text" className="input input-bordered w-full bg-base-200" placeholder="Kode barang" value={data.kode_barang} onChange={(e) => setData('kode_barang', e.target.value)} readOnly />
-                        </div>
-                        <div>
-                            <label className="label"><span className="label-text font-medium">Nama Barang</span></label>
-                            <input type="text" className="input input-bordered w-full" placeholder="Nama barang" value={data.nama_barang} onChange={(e) => setData('nama_barang', e.target.value)} required />
-                        </div>
-                        <div>
-                            <label className="label"><span className="label-text font-medium">Tanggal Masuk</span></label>
-                            <input type="date" className="input input-bordered w-full" value={data.tanggal_masuk} onChange={(e) => setData('tanggal_masuk', e.target.value)} required />
-                        </div>
-                        <div>
-                            <label className="label"><span className="label-text font-medium">Kondisi Barang</span></label>
-                            <select className="select select-bordered w-full" value={data.kondisi} onChange={(e) => setData('kondisi', e.target.value)} required>
-                                <option value="" disabled>Pilih kondisi</option>
-                                <option>Baik</option>
-                                <option>Perbaikan</option>
-                                <option>Rusak</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className="label"><span className="label-text font-medium">Letak Barang</span></label>
-                            <input type="text" className="input input-bordered w-full" placeholder="Letak barang" value={data.letak} onChange={(e) => setData('letak', e.target.value)} required />
-                        </div>
-                    </div>
-                    <div className="modal-action">
-                        <button type="button" className="btn btn-ghost" onClick={onClose}>Batal</button>
-                        <button type="submit" disabled={processing} className="btn btn-primary">
-                            {processing && <span className="loading loading-spinner loading-sm" />}
-                            Simpan
-                        </button>
-                    </div>
-                </form>
             </div>
-            <div className="modal-backdrop" onClick={onClose} />
-        </dialog>
+        </div>
     );
 }

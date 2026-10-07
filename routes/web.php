@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\admin\BahanController;
+use App\Http\Controllers\admin\BahanMasukController;
 use App\Http\Controllers\admin\CustomerController;
+use App\Http\Controllers\admin\CustomerMappingController;
 use App\Http\Controllers\admin\DashboardController;
 use App\Http\Controllers\admin\InventarisController;
 use App\Http\Controllers\admin\InvoiceController;
@@ -9,6 +12,7 @@ use App\Http\Controllers\admin\PenggunaController;
 use App\Http\Controllers\admin\ProdukController;
 use App\Http\Controllers\admin\SuratjalanController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\PetaCustomerController;
 use App\Http\Middleware\Ceklogin;
 use Illuminate\Support\Facades\Route;
 
@@ -16,6 +20,8 @@ Route::get('/', [LoginController::class, 'index'])->name('menu');
 Route::get('/login/{menu}', [LoginController::class, 'showLogin'])->name('login');
 Route::post('/login', [LoginController::class, 'actlogin'])->name('login.auth');
 Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
+
+Route::get('/peta-customer', [PetaCustomerController::class, 'index'])->name('peta.customer');
 
 Route::middleware([Ceklogin::class])->group(function () {
 
@@ -25,6 +31,11 @@ Route::middleware([Ceklogin::class])->group(function () {
     Route::post('/customer', [CustomerController::class, 'store'])->name('customer.store');
     Route::put('/customer/{id}', [CustomerController::class, 'update'])->name('customer.update');
     Route::delete('/customer/{id}', [CustomerController::class, 'delete'])->name('customer.delete');
+
+    Route::get('/customer-mapping', [CustomerMappingController::class, 'index'])->name('customermapping');
+    Route::post('/customer-mapping', [CustomerMappingController::class, 'store'])->name('customermapping.store');
+    Route::put('/customer-mapping/{id}', [CustomerMappingController::class, 'update'])->name('customermapping.update');
+    Route::delete('/customer-mapping/{id}', [CustomerMappingController::class, 'delete'])->name('customermapping.delete');
 
     Route::get('/produk', [ProdukController::class, 'index'])->name('produk');
     Route::get('/produk/{id}', [ProdukController::class, 'detail'])->name('detail');
@@ -73,6 +84,13 @@ Route::middleware([Ceklogin::class])->group(function () {
     Route::get('/review-sj/{no_sj}', [SuratjalanController::class, 'reviewSj'])->name('review.sj');
     Route::get('/review-preview-sj/{no_sj}', [SuratjalanController::class, 'reviewSjPreview'])->name('review.sj.preview');
     Route::post('/cetak-status-sj/{no_sj}', [SuratjalanController::class, 'cetakStatusSj'])->name('cetak.status.sj');
+
+    Route::get('/bahanmasuk', [BahanMasukController::class, 'index'])->name('bahanmasuk');
+    Route::post('/bahanmasuk', [BahanMasukController::class, 'store'])->name('bahanmasuk.store');
+    Route::put('/bahanmasuk/{id}', [BahanMasukController::class, 'update'])->name('bahanmasuk.update');
+    Route::delete('/bahanmasuk/{id}', [BahanMasukController::class, 'delete'])->name('bahanmasuk.delete');
+
+    Route::get('/bahan', [BahanController::class, 'index'])->name('bahan');
 
     Route::get('/inventaris', [InventarisController::class, 'index'])->name('inventaris');
     Route::get('/inventaris/cetak-label', [InventarisController::class, 'label'])->name('inventaris.label');

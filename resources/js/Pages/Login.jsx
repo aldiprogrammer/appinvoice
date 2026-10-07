@@ -16,70 +16,66 @@ export default function Login({ menu, menuLabel }) {
     return (
         <GuestLayout>
             <Head title="Login" />
-            <div className="px-4 w-full max-w-[420px]">
-                <div className="bg-base-100 rounded-2xl shadow-2xl p-8 text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/30">
-                        <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
-                        </svg>
+            <div className="px-3 w-100" style={{ maxWidth: 420 }}>
+                <div className="bg-white text-center shadow-lg rounded-lg" style={{ padding: '40px 32px', borderRadius: 16 }}>
+                    <div
+                        className="d-flex align-items-center justify-content-center mx-auto mb-4"
+                        style={{ width: 64, height: 64, borderRadius: 16, background: 'linear-gradient(135deg,#3b82f6,#2563eb)', boxShadow: '0 8px 16px rgba(37,99,235,.3)' }}
+                    >
+                        <i className="fas fa-file-invoice" style={{ color: '#fff', fontSize: '1.75rem' }}></i>
                     </div>
-                    <h1 className="text-xl font-bold text-base-content">{menuLabel} PT. SAN</h1>
-                    <p className="text-sm text-base-content/45">Management System</p>
+                    <h1 className="font-weight-bold" style={{ fontSize: '1.5rem', color: 'rgba(0,0,0,.85)' }}>{menuLabel} PT. SAN</h1>
+                    <p className="mb-0" style={{ fontSize: '.875rem', color: 'rgba(0,0,0,.45)' }}>Management System</p>
 
                     {errors.username && (
-                        <div className="alert alert-error mt-4 text-sm py-2">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                        <div className="alert alert-danger d-flex align-items-center text-left mt-4 mb-0" role="alert" style={{ fontSize: '.875rem', padding: '12px 16px' }}>
+                            <i className="fas fa-exclamation-circle mr-2"></i>
                             <span>{errors.username || errors.password || 'Username atau password salah'}</span>
                         </div>
                     )}
 
-                    <form onSubmit={submit} className="mt-6 text-left">
+                    <form onSubmit={submit} className="text-left" style={{ marginTop: 24 }}>
                         <input type="hidden" name="menu" value={menu} />
-                        <div className="mb-3">
-                            <label className="label">
-                                <span className="label-text font-semibold text-sm">Username</span>
-                            </label>
+                        <div className="form-group">
+                            <label htmlFor="username" className="font-weight-semibold small font-weight-bold">Username</label>
                             <input
+                                id="username"
                                 type="text"
-                                className="input input-bordered w-full"
+                                className="form-control"
                                 placeholder="Masukkan username"
                                 value={data.username}
                                 onChange={(e) => setData('username', e.target.value)}
+                                style={{ minHeight: 42 }}
                                 required
                                 autoFocus
                             />
                         </div>
-                        <div className="mb-3">
-                            <label className="label">
-                                <span className="label-text font-semibold text-sm">Password</span>
-                            </label>
+                        <div className="form-group">
+                            <label htmlFor="password" className="font-weight-bold small">Password</label>
                             <input
+                                id="password"
                                 type="password"
-                                className="input input-bordered w-full"
+                                className="form-control"
                                 placeholder="Masukkan password"
                                 value={data.password}
                                 onChange={(e) => setData('password', e.target.value)}
+                                style={{ minHeight: 42 }}
                                 required
                             />
                         </div>
                         <button
                             type="submit"
                             disabled={processing}
-                            className="btn btn-primary w-full mt-4"
+                            className="btn btn-primary btn-block mt-4"
+                            style={{ minHeight: 42, boxShadow: '0 4px 12px rgba(37,99,235,.3)' }}
                         >
-                            {processing ? <span className="loading loading-spinner loading-sm" /> : (
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                                </svg>
-                            )}
-                            Login
+                            {processing && <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true" />}
+                            <i className="fas fa-sign-in-alt mr-2"></i> Login
                         </button>
-                        <Link href='/' className="btn btn-success w-full mt-2 text-white" >Kembali ke menu</Link>
+                        <Link href="/" className="btn btn-success btn-block mt-2 text-white">Kembali ke menu</Link>
                     </form>
                 </div>
-                <p className="text-center text-white/40 mt-3 text-xs">
+                <p className="text-center mt-3 mb-0" style={{ color: 'rgba(255,255,255,.5)', fontSize: '.75rem' }}>
                     &copy; {new Date().getFullYear()} {menuLabel} PTSAN. All rights reserved.
                 </p>
             </div>

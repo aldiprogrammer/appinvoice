@@ -21,22 +21,22 @@ export default function Index({ list }) {
     return (
         <AppLayout title="List Surat Jalan">
             <Head title="List Surat Jalan" />
-            <div className="card bg-base-100 border border-base-300 shadow-sm p-6">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
+            <div className="card bg-white border shadow-sm p-4" style={{ borderColor: '#e5e7eb' }}>
+                <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between mb-4" style={{ gap: '.75rem' }}>
                     <div>
-                        <h1 className="text-2xl font-bold">List Surat Jalan</h1>
-                        <p className="text-sm text-base-content/50">Semua data surat jalan tersimpan</p>
+                        <h1 className="font-weight-bold" style={{ fontSize: '1.5rem' }}>List Surat Jalan</h1>
+                        <p className="small text-muted">Semua data surat jalan tersimpan</p>
                     </div>
                 </div>
 
-                <div className="mb-4">
-                    <input type="text" placeholder="Cari surat jalan..." className="input input-bordered w-full max-w-xs" value={search} onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }} />
+                <div className="mb-3">
+                    <input type="text" placeholder="Cari surat jalan..." className="form-control" style={{ maxWidth: '20rem' }} value={search} onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }} />
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="table table-zebra w-full">
-                        <thead>
-                            <tr className="bg-primary text-white">
+                <div className="table-responsive">
+                    <table className="table table-striped table-sm">
+                        <thead style={{ background: '#3b82f6' }}>
+                            <tr>
                                 <th className="text-white">No</th>
                                 <th className="text-white">No SJ</th>
                                 <th className="text-white">No. Kendaraan</th>
@@ -53,12 +53,12 @@ export default function Index({ list }) {
                         <tbody>
                             {paginated.length === 0 ? (
                                 <tr>
-                                    <td colSpan={11} className="text-center py-12">
-                                        <div className="flex flex-col items-center">
-                                            <div className="w-16 h-16 rounded-full bg-base-200 flex items-center justify-center mb-3">
-                                                <svg className="w-8 h-8 text-base-content/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                    <td colSpan={11} className="text-center" style={{ padding: '3rem 0' }}>
+                                        <div className="d-flex flex-column align-items-center">
+                                            <div className="rounded-circle d-flex align-items-center justify-content-center mb-3" style={{ width: 64, height: 64, background: '#f0f2f5' }}>
+                                                <i className="fas fa-file-alt" style={{ color: 'rgba(0,0,0,.3)', fontSize: '2rem' }} />
                                             </div>
-                                            <p className="font-bold text-base-content/40">Belum ada data surat jalan</p>
+                                            <p className="font-weight-bold" style={{ color: 'rgba(0,0,0,.4)' }}>Belum ada data surat jalan</p>
                                             <a href="/suratjalan" className="btn btn-primary btn-sm mt-2">Buat Surat Jalan Baru</a>
                                         </div>
                                     </td>
@@ -66,47 +66,47 @@ export default function Index({ list }) {
                             ) : paginated.map((item, idx) => (
                                 <tr key={item.id}>
                                     <th>{(currentPage - 1) * perPage + idx + 1}</th>
-                                    <td className="font-bold">{item.no_sj}</td>
+                                    <td className="font-weight-bold">{item.no_sj}</td>
                                     <td>{item.nomor_kendaraan || '-'}</td>
                                     <td>{item.customer_nama || '-'}</td>
                                     <td>{item.pengguna_username || '-'}</td>
                                     <td>{item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID') : '-'}</td>
-                                    <td className="font-bold">{Number(item.total_kg || 0).toLocaleString('id-ID')} kg</td>
+                                    <td className="font-weight-bold">{Number(item.total_kg || 0).toLocaleString('id-ID')} kg</td>
                                     <td>
                                         {item.status_cetak == 0 ? (
-                                            <span className="badge badge-warning badge-sm gap-1">
-                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                                            <span className="badge badge-warning">
+                                                <i className="fas fa-print mr-1" style={{ fontSize: 12 }} />
                                                 Belum
                                             </span>
                                         ) : (
-                                            <span className="badge badge-success badge-sm gap-1">
-                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                            <span className="badge badge-success">
+                                                <i className="fas fa-check mr-1" style={{ fontSize: 12 }} />
                                                 Dicetak
                                             </span>
                                         )}
                                     </td>
                                     <td>
                                         {item.status == 0 ? (
-                                            <span className="badge badge-warning badge-sm gap-1">
-                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" strokeWidth={2} stroke="currentColor" fill="none" /></svg>
+                                            <span className="badge badge-warning">
+                                                <i className="fas fa-circle mr-1" style={{ fontSize: 12 }} />
                                                 Menunggu
                                             </span>
                                         ) : (
-                                            <span className="badge badge-success badge-sm gap-1">
-                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                            <span className="badge badge-success">
+                                                <i className="fas fa-check mr-1" style={{ fontSize: 12 }} />
                                                 Disetujui
                                             </span>
                                         )}
                                     </td>
                                     <td>{item.user_setujui_username || '-'}</td>
                                     <td>
-                                        <div className="flex justify-center gap-1">
-                                            <a href={`/listsuratjalan/${item.no_sj}`} className="btn btn-primary btn-xs">
-                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                        <div className="d-flex justify-content-center" style={{ gap: '.25rem' }}>
+                                            <a href={`/listsuratjalan/${item.no_sj}`} className="btn btn-primary btn-sm">
+                                                <i className="fas fa-eye" />
                                             </a>
                                             {(item.status != 1 || auth.level === 'super admin') && (
-                                                <button className="btn btn-error btn-xs" onClick={() => setDeleteItem(item)}>
-                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                <button className="btn btn-danger btn-sm" onClick={() => setDeleteItem(item)}>
+                                                    <i className="fas fa-trash-alt" />
                                                 </button>
                                             )}
                                         </div>
@@ -118,35 +118,49 @@ export default function Index({ list }) {
                 </div>
 
                 {totalPages > 1 && (
-                    <div className="flex justify-between items-center mt-4">
-                        <span className="text-sm text-base-content/50">Menampilkan {(currentPage - 1) * perPage + 1}-{Math.min(currentPage * perPage, filtered.length)} dari {filtered.length} data</span>
-                        <div className="join">
-                            <button className="join-item btn btn-sm" disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}>«</button>
-                            {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => (
-                                <button key={i} className={`join-item btn btn-sm ${currentPage === i + 1 ? 'btn-primary' : ''}`} onClick={() => setCurrentPage(i + 1)}>{i + 1}</button>
-                            ))}
-                            <button className="join-item btn btn-sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(currentPage + 1)}>»</button>
-                        </div>
+                    <div className="d-flex justify-content-between align-items-center mt-3">
+                        <span className="small text-muted">Menampilkan {(currentPage - 1) * perPage + 1}-{Math.min(currentPage * perPage, filtered.length)} dari {filtered.length} data</span>
+                        <nav>
+                            <ul className="pagination pagination-sm mb-0">
+                                <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                    <button className="page-link" disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}>«</button>
+                                </li>
+                                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => (
+                                    <li key={i} className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}>
+                                        <button className="page-link" onClick={() => setCurrentPage(i + 1)}>{i + 1}</button>
+                                    </li>
+                                ))}
+                                <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                                    <button className="page-link" disabled={currentPage === totalPages} onClick={() => setCurrentPage(currentPage + 1)}>»</button>
+                                </li>
+                            </ul>
+                        </nav>
                     </div>
                 )}
             </div>
 
             {deleteItem && (
-                <dialog className="modal modal-open">
-                    <div className="modal-box text-center">
-                        <div className="w-20 h-20 rounded-full bg-error/10 flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-8 h-8 text-error" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                        </div>
-                        <h3 className="font-bold text-lg">Hapus Surat Jalan</h3>
-                        <p className="text-base-content/60 mt-2">Apakah anda yakin ingin menghapus surat jalan ini?</p>
-                        <p className="font-bold text-lg mt-1">{deleteItem.no_sj}</p>
-                        <div className="modal-action justify-center">
-                            <button className="btn btn-ghost" onClick={() => setDeleteItem(null)}>Batal</button>
-                            <button className="btn btn-error" onClick={() => { router.delete(`/listsuratjalan2/${deleteItem.id}`); setDeleteItem(null); }}>Hapus</button>
+                <div className="modal d-block" style={{ zIndex: 1050, background: 'rgba(0,0,0,.5)', overflowY: 'auto' }} onClick={() => setDeleteItem(null)}>
+                    <div className="modal-dialog modal-dialog-centered" role="document" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title font-weight-bold">Hapus Surat Jalan</h5>
+                                <button type="button" className="close" onClick={() => setDeleteItem(null)}><span>&times;</span></button>
+                            </div>
+                            <div className="modal-body text-center">
+                                <div className="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: 80, height: 80, background: 'rgba(220,53,69,.1)' }}>
+                                    <i className="fas fa-trash-alt" style={{ color: '#dc3545', fontSize: '2rem' }} />
+                                </div>
+                                <p className="text-muted" style={{ marginTop: '.5rem' }}>Apakah anda yakin ingin menghapus surat jalan ini?</p>
+                                <p className="font-weight-bold" style={{ fontSize: '1.125rem', marginTop: '.25rem' }}>{deleteItem.no_sj}</p>
+                            </div>
+                            <div className="modal-footer justify-content-center">
+                                <button className="btn btn-light" onClick={() => setDeleteItem(null)}>Batal</button>
+                                <button className="btn btn-danger" onClick={() => { router.delete(`/listsuratjalan2/${deleteItem.id}`); setDeleteItem(null); }}>Hapus</button>
+                            </div>
                         </div>
                     </div>
-                    <form method="dialog" className="modal-backdrop" onClick={() => setDeleteItem(null)}><button>close</button></form>
-                </dialog>
+                </div>
             )}
         </AppLayout>
     );

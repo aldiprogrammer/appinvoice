@@ -23,6 +23,6 @@ export function levelBadge(level) {
         case 'admin':
             return 'badge-success';
         default:
-            return 'badge-error';
+            return 'badge-danger';
     }
 }
