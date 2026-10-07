@@ -274,6 +274,13 @@ export default function PetaCustomer({ mappings = [] }) {
                 </div>`;
 
             marker.bindPopup(popupHtml, { offset: [0, -4], closeButton: true });
+            marker.bindTooltip(m.nama_toko ?? 'Toko', {
+                permanent: true,
+                direction: 'top',
+                offset: [0, -8],
+                className: 'peta-marker-label',
+                opacity: 1,
+            });
             markerRefs.current[m.id] = marker;
 
             marker.on('click', () => {
