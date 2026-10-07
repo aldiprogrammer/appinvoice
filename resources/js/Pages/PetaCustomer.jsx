@@ -263,7 +263,7 @@ export default function PetaCustomer({ mappings = [] }) {
                 ? splitProduk(m.produk).map((p) => `<span style="display:inline-block;background:#eff6ff;color:#1d4ed8;border-radius:99px;padding:1px 8px;font-size:11px;margin:0 2px 2px 0">${p}</span>`).join('')
                 : '<span style="color:#94a3b8;font-size:12px">-</span>';
 
-            const popupHtml = `<div style="min-width:200px;font-family:'Instrument Sans',sans-serif">
+            const popupHtml = `<div style="min-width:220px;font-family:'Instrument Sans',sans-serif">
                     <div style="font-weight:700;font-size:14px;margin-bottom:2px">${m.nama_toko ?? ''}</div>
                     <div style="font-size:12px;color:#64748b;margin-bottom:8px">${m.alamat ?? ''}</div>
                     <div style="margin-bottom:8px">${produkHtml}</div>
@@ -271,6 +271,11 @@ export default function PetaCustomer({ mappings = [] }) {
                         <span style="display:inline-flex;align-items:center;background:${isActive ? '#dcfce7' : '#e2e8f0'};color:${isActive ? '#15803d' : '#475569'};border-radius:99px;padding:2px 10px;font-size:11px;font-weight:600">${m.status ?? ''}</span>
                         ${m.km != null ? `<span style="font-size:11px;font-weight:700;color:#059669">${fmtKm(m.km)} dari lokasi Anda</span>` : ''}
                     </div>
+                    <a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank" rel="noopener noreferrer"
+                       style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;background:#4285F4;color:#fff;text-decoration:none;border-radius:8px;padding:7px 0;font-size:12px;font-weight:700;transition:background .15s">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polyline><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+                        Buka di Google Maps
+                    </a>
                 </div>`;
 
             marker.bindPopup(popupHtml, { offset: [0, -4], closeButton: true });
