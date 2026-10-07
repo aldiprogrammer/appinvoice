@@ -1,0 +1,1 @@
+function o(i){const t=String(i).replace(/[^,\d]/g,"").split(",");let r=t[0].length%3,n=t[0].substring(0,r);const s=t[0].substring(r).match(/\d{3}/gi);return s&&(n+=(r?".":"")+s.join(".")),n}export{o as f};
