@@ -1,12 +1,12 @@
 #!/bin/bash
 set -e
 
-APP_DIR="/home/u107214145/domains/sentosaprinting.com/posalnew"
-WEB_DIR="/home/u107214145/domains/sentosaprinting.com/public_html/posal"
+APP_DIR="/home/u107214145/domains/fabricoasia.com/map"
+WEB_DIR="/home/u107214145/domains/fabricoasia.com/public_html/map"
 BRANCH="main"
 
 echo "======================================"
-echo "   DEPLOY LARAVEL"Aplikasi POSAL
+echo "   DEPLOY LARAVEL"
 echo "======================================"
 
 cd "$APP_DIR"
@@ -82,9 +82,9 @@ use Illuminate\Http\Request;
 
 define('LARAVEL_START', microtime(true));
 
-require __DIR__.'/../../posalnew/vendor/autoload.php';
+require __DIR__.'/../../map/vendor/autoload.php';
 
-$app = require_once __DIR__.'/../../posalnew/bootstrap/app.php';
+$app = require_once __DIR__.'/../../map/bootstrap/app.php';
 
 $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 
