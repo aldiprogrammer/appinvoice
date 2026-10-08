@@ -68,6 +68,7 @@ export default function AppLayout({ children, title }) {
 
                     {(showAll || hasMenu('customer')) && navLink('/customer', 'fa-users', 'Customer')}
                     {(showAll || hasMenu('customermapping')) && navLink('/customer-mapping', 'fa-map-marker-alt', 'Customer Mapping')}
+                    {(showAll || hasMenu('ordercustomer')) && navLink('/ordercustomer', 'fa-shopping-cart', 'Order Customer')}
                     {(showAll || hasMenu('produk')) && navLink('/produk', 'fa-box', 'Produk')}
                     {(showAll || hasMenu('bahanmasuk')) && navLink('/bahanmasuk', 'fa-cubes', 'Bahan Masuk')}
                     {(showAll || hasMenu('bahan')) && navLink('/bahan', 'fa-layer-group', 'Data Bahan')}

@@ -85,7 +85,7 @@ export default function Index({ produk }) {
 
                 {totalPages > 1 && (
                     <div className="d-flex justify-content-between align-items-center mt-4">
-                        <span className="small text-muted">Menampilkan {(currentPage-1)*perPage+1}-{Math.min(currentPage*perPage, filtered.length)} dari {filtered.length} data</span>
+                        <span className="small text-muted">Menampilkan {(currentPage - 1) * perPage + 1}-{Math.min(currentPage * perPage, filtered.length)} dari {filtered.length} data</span>
                         <ul className="pagination pagination-sm mb-0">
                             <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}><button className="page-link" disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}>«</button></li>
                             {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => (
@@ -170,8 +170,13 @@ function ProdukModal({ item = null, onClose }) {
                                     <option value="" disabled>Pilih kemasan</option>
                                     <option value="5">5kg</option>
                                     <option value="10">10kg</option>
+                                    <option value="15">15kg</option>
                                     <option value="20">20kg</option>
+                                    <option value="25">25kg</option>
                                     <option value="30">30kg</option>
+                                    <option value="35">35kg</option>
+                                    <option value="40">40kg</option>
+                                    <option value="45">45kg</option>
                                     <option value="50">50kg</option>
                                 </select>
                             </div>

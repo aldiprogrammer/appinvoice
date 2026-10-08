@@ -211,6 +211,7 @@ function PenggunaModal({ item = null, onClose }) {
                                         { value: 'home', label: 'Home', color: '#2563eb' },
                                         { value: 'customer', label: 'Customer', color: '#16a34a' },
                                         { value: 'customermapping', label: 'Customer Mapping', color: '#16a34a' },
+                                        { value: 'ordercustomer', label: 'Order Customer', color: '#0891b2' },
                                         { value: 'produk', label: 'Produk', color: '#ea580c' },
                                         { value: 'bahanmasuk', label: 'Bahan Masuk', color: '#ea580c' },
                                         { value: 'bahan', label: 'Data Bahan', color: '#2563eb' },

@@ -6,6 +6,7 @@ export default function Menu() {
         { label: 'Invoice', icon: 'fa-file-invoice', color: 'bg-grad-green', url: '/login/invoice' },
         { label: 'Surat Jalan', icon: 'fa-truck', color: 'bg-grad-orange', url: '/login/suratjalan' },
         { label: 'Inventaris', icon: 'fa-boxes', color: 'bg-grad-purple', url: '/login/inventaris' },
+        { label: 'Mapping Customer', icon: 'fa-map', color: 'bg-grad-blue', url: '/peta-customer' },
         { label: 'Admin', icon: 'fa-user-shield', color: 'bg-grad-red', url: '/login/admin' },
     ];
 

@@ -8,6 +8,7 @@ use App\Http\Controllers\admin\DashboardController;
 use App\Http\Controllers\admin\InventarisController;
 use App\Http\Controllers\admin\InvoiceController;
 use App\Http\Controllers\admin\ListinvoiceController;
+use App\Http\Controllers\admin\OrderCustomerController;
 use App\Http\Controllers\admin\PenggunaController;
 use App\Http\Controllers\admin\ProdukController;
 use App\Http\Controllers\admin\SuratjalanController;
@@ -36,6 +37,13 @@ Route::middleware([Ceklogin::class])->group(function () {
     Route::post('/customer-mapping', [CustomerMappingController::class, 'store'])->name('customermapping.store');
     Route::put('/customer-mapping/{id}', [CustomerMappingController::class, 'update'])->name('customermapping.update');
     Route::delete('/customer-mapping/{id}', [CustomerMappingController::class, 'delete'])->name('customermapping.delete');
+
+    Route::get('/ordercustomer', [OrderCustomerController::class, 'index'])->name('ordercustomer');
+    Route::get('/ordercustomer/template', [OrderCustomerController::class, 'template'])->name('ordercustomer.template');
+    Route::post('/ordercustomer', [OrderCustomerController::class, 'store'])->name('ordercustomer.store');
+    Route::post('/ordercustomer/import', [OrderCustomerController::class, 'import'])->name('ordercustomer.import');
+    Route::put('/ordercustomer/{id}', [OrderCustomerController::class, 'update'])->name('ordercustomer.update');
+    Route::delete('/ordercustomer/{id}', [OrderCustomerController::class, 'delete'])->name('ordercustomer.delete');
 
     Route::get('/produk', [ProdukController::class, 'index'])->name('produk');
     Route::get('/produk/{id}', [ProdukController::class, 'detail'])->name('detail');
