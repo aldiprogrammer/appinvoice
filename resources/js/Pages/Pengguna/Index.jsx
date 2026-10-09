@@ -82,7 +82,7 @@ export default function Index({ user }) {
                                         <div className="d-flex flex-wrap" style={{ gap: 0 }}>
                                             {(item.hak_akses || '').split(',').filter(Boolean).map((m) => (
                                                 <span key={m} className={`badge mr-1 ${m === 'pengguna' ? 'badge-danger' : m === 'produk' ? 'badge-warning' : m === 'customer' ? 'badge-success' : 'badge-primary'}`}>
-                                                    {m === 'home' ? 'Home' : m === 'listinvoice' ? 'List Invoice' : m === 'listsuratjalan' ? 'List SJ' : m === 'suratjalan' ? 'Surat Jalan' : m === 'inventaris' ? 'Inventaris' : m === 'bahanmasuk' ? 'Bahan Masuk' : m === 'bahan' ? 'Data Bahan' : m === 'customermapping' ? 'Customer Mapping' : m.charAt(0).toUpperCase() + m.slice(1)}
+                                                    {m === 'home' ? 'Home' : m === 'listinvoice' ? 'List Invoice' : m === 'listsuratjalan' ? 'List SJ' : m === 'suratjalan' ? 'Surat Jalan' : m === 'inventaris' ? 'Inventaris' : m === 'followup' ? 'Waktu Follow-up' : m === 'kirimnotif' ? 'Kirim Notifikasi' : m === 'bahanmasuk' ? 'Bahan Masuk' : m === 'bahan' ? 'Data Bahan' : m === 'customermapping' ? 'Customer Mapping' : m.charAt(0).toUpperCase() + m.slice(1)}
                                                 </span>
                                             ))}
                                         </div>
@@ -219,6 +219,8 @@ function PenggunaModal({ item = null, onClose }) {
                                         { value: 'listinvoice', label: 'List Invoice', color: '#3b82f6' },
                                         { value: 'suratjalan', label: 'Surat Jalan', color: '#3b82f6' },
                                         { value: 'inventaris', label: 'Inventaris', color: '#9333ea' },
+                                        { value: 'followup', label: 'Waktu Follow-up', color: '#0891b2' },
+                                        { value: 'kirimnotif', label: 'Kirim Notifikasi', color: '#0891b2' },
                                         { value: 'listsuratjalan', label: 'List Surat Jalan', color: '#3b82f6' },
                                         { value: 'pengguna', label: 'Pengguna', color: '#dc2626' },
                                     ].map((opt) => {

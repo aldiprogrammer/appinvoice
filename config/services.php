@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'onesignal' => [
+        'app_id' => env('ONESIGNAL_APP_ID', env('VITE_ONESIGNAL_APP_ID')),
+        'rest_api_key' => env('ONESIGNAL_REST_API_KEY'),
+        'segment' => env('ONESIGNAL_SEGMENT', 'Total Subscriptions'),
+    ],
+
 ];

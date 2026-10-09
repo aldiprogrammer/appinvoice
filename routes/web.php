@@ -5,13 +5,16 @@ use App\Http\Controllers\admin\BahanMasukController;
 use App\Http\Controllers\admin\CustomerController;
 use App\Http\Controllers\admin\CustomerMappingController;
 use App\Http\Controllers\admin\DashboardController;
+use App\Http\Controllers\admin\FollowupController;
 use App\Http\Controllers\admin\InventarisController;
 use App\Http\Controllers\admin\InvoiceController;
 use App\Http\Controllers\admin\ListinvoiceController;
+use App\Http\Controllers\admin\NotifikasiController;
 use App\Http\Controllers\admin\OrderCustomerController;
 use App\Http\Controllers\admin\PenggunaController;
 use App\Http\Controllers\admin\ProdukController;
 use App\Http\Controllers\admin\SuratjalanController;
+use App\Http\Controllers\FollowupCustomerController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PetaCustomerController;
 use App\Http\Middleware\Ceklogin;
@@ -23,6 +26,7 @@ Route::post('/login', [LoginController::class, 'actlogin'])->name('login.auth');
 Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/peta-customer', [PetaCustomerController::class, 'index'])->name('peta.customer');
+Route::get('/follow-up-customer', [FollowupCustomerController::class, 'index'])->name('followupcustomer');
 
 Route::middleware([Ceklogin::class])->group(function () {
 
@@ -99,6 +103,12 @@ Route::middleware([Ceklogin::class])->group(function () {
     Route::delete('/bahanmasuk/{id}', [BahanMasukController::class, 'delete'])->name('bahanmasuk.delete');
 
     Route::get('/bahan', [BahanController::class, 'index'])->name('bahan');
+
+    Route::get('/followup', [FollowupController::class, 'index'])->name('followup');
+    Route::post('/followup', [FollowupController::class, 'store'])->name('followup.store');
+
+    Route::get('/kirim-notifikasi', [NotifikasiController::class, 'index'])->name('kirimnotifikasi');
+    Route::post('/kirim-notifikasi', [NotifikasiController::class, 'send'])->name('kirimnotifikasi.send');
 
     Route::get('/inventaris', [InventarisController::class, 'index'])->name('inventaris');
     Route::get('/inventaris/cetak-label', [InventarisController::class, 'label'])->name('inventaris.label');

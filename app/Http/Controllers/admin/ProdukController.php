@@ -11,7 +11,7 @@ class ProdukController extends Controller
 {
     public function index()
     {
-        $produk = Produk::all();
+        $produk = Produk::orderBy('id', 'desc')->get();
 
         return Inertia::render('Produk/Index', compact('produk'));
     }

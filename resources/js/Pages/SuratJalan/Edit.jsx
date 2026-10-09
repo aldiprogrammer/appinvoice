@@ -7,6 +7,8 @@ export default function Edit({ sj, customer, produk, list, total }) {
     const { data, setData, put, processing } = useForm({
         customer: sj?.id_customer || '',
         nomor_kendaraan: sj?.nomor_kendaraan || '',
+        no_do: sj?.no_do || '',
+        gudang: sj?.gudang || 'A',
         produk: sj?.id_produk || '',
         harga: sj?.harga || '',
         jml_sak: sj?.jml_sak || '',
@@ -78,18 +80,29 @@ export default function Edit({ sj, customer, produk, list, total }) {
                                             placeholder="Pilih Customer..."
                                         />
                                     </div>
+                                    <div className="col-12 col-md-6 form-group">
+                                        <label className="small font-weight-bold text-uppercase">No Do</label>
+                                        <input type="text" className="form-control form-control-sm" value={data.no_do} onChange={(e) => setData('no_do', e.target.value)} placeholder="Kosongkan jika tidak ada" />
+                                    </div>
                                     <div className="col-12 form-group">
                                         <label className="small font-weight-bold text-uppercase">Alamat</label>
                                         <textarea className="form-control" rows={2} value={alamat} readOnly />
                                     </div>
-                                    <div className="col-12 form-group">
+                                    <div className="col-12 col-md-6 form-group">
                                         <label className="small font-weight-bold text-uppercase">Nomor Kendaraan</label>
                                         <input type="text" className="form-control form-control-sm" value={data.nomor_kendaraan} onChange={(e) => setData('nomor_kendaraan', e.target.value)} placeholder="Masukkan nomor kendaraan" />
                                     </div>
                                     <div className="col-12 col-md-6 form-group">
+                                        <label className="small font-weight-bold text-uppercase">Gudang</label>
+                                        <select className="form-control form-control-sm" value={data.gudang} onChange={(e) => setData('gudang', e.target.value)}>
+                                            <option value="A">A</option>
+                                            <option value="B">B</option>
+                                        </select>
+                                    </div>
+                                    <div className="col-12 col-md-6 form-group">
                                         <label className="small font-weight-bold text-uppercase">Produk</label>
                                         <SearchableSelect
-                                            options={produk.map((p) => ({ value: p.id, label: `${p.produk} - ${p.kemasan}kg (${p.kualitas})` }))}
+                                            options={produk.map((p) => ({ value: p.id, label: `${p.produk} - ${p.kemasan}kg${p.kualitas ? ` (${p.kualitas})` : ''}` }))}
                                             value={data.produk}
                                             onChange={(val) => setData('produk', val)}
                                             placeholder="Pilih Produk..."
@@ -155,6 +168,14 @@ export default function Edit({ sj, customer, produk, list, total }) {
                                     <div className="col-12">
                                         <span className="small font-weight-bold text-primary text-uppercase">Nomor Kendaraan</span>
                                         <p className="font-weight-bold">{sj?.nomor_kendaraan || '-'}</p>
+                                    </div>
+                                    <div className="col-6">
+                                        <span className="small font-weight-bold text-primary text-uppercase">No Do</span>
+                                        <p className="font-weight-bold">{sj?.no_do || '-'}</p>
+                                    </div>
+                                    <div className="col-6 text-right">
+                                        <span className="small font-weight-bold text-primary text-uppercase">Gudang</span>
+                                        <p className="font-weight-bold">{sj?.gudang || 'A'}</p>
                                     </div>
                                 </div>
                                 <div className="table-responsive rounded border">

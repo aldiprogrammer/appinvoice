@@ -100,6 +100,8 @@ function SJForm({ customer, produk, no_sj, listkode }) {
         no_sj: no_sj,
         customer: listkode?.id_customer || '',
         nomor_kendaraan: listkode?.nomor_kendaraan || '',
+        no_do: listkode?.no_do || '',
+        gudang: listkode?.gudang || 'A',
         produk: '',
         harga: '',
         jml_sak: '',
@@ -157,6 +159,10 @@ function SJForm({ customer, produk, no_sj, listkode }) {
                         <input type="text" className="form-control form-control-sm" value={no_sj} readOnly />
                     </div>
                     <div className="col-12 col-md-6 form-group">
+                        <label className="small font-weight-bold text-uppercase">No Do</label>
+                        <input type="text" className="form-control form-control-sm" name="no_do" value={data.no_do} onChange={(e) => setData('no_do', e.target.value)} placeholder="Kosongkan jika tidak ada" />
+                    </div>
+                    <div className="col-12 col-md-6 form-group">
                         <label className="small font-weight-bold text-uppercase">Customer</label>
                         <SearchableSelect
                             options={customer.map((c) => ({ value: c.id, label: c.nama }))}
@@ -169,14 +175,21 @@ function SJForm({ customer, produk, no_sj, listkode }) {
                         <label className="small font-weight-bold text-uppercase">Alamat</label>
                         <textarea className="form-control" rows={2} value={alamat} readOnly />
                     </div>
-                    <div className="col-12 form-group">
+                    <div className="col-12 col-md-6 form-group">
                         <label className="small font-weight-bold text-uppercase">Nomor Kendaraan</label>
                         <input type="text" className="form-control form-control-sm" name="nomor_kendaraan" value={data.nomor_kendaraan} onChange={(e) => setData('nomor_kendaraan', e.target.value)} placeholder="Masukkan nomor kendaraan" />
                     </div>
                     <div className="col-12 col-md-6 form-group">
+                        <label className="small font-weight-bold text-uppercase">Gudang</label>
+                        <select className="form-control form-control-sm" name="gudang" value={data.gudang} onChange={(e) => setData('gudang', e.target.value)}>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                        </select>
+                    </div>
+                    <div className="col-12 col-md-6 form-group">
                         <label className="small font-weight-bold text-uppercase">Produk</label>
                         <SearchableSelect
-                            options={produk.map((p) => ({ value: p.id, label: `${p.produk} - ${p.kemasan}kg (${p.kualitas})` }))}
+                            options={produk.map((p) => ({ value: p.id, label: `${p.produk} - ${p.kemasan}kg${p.kualitas ? ` (${p.kualitas})` : ''}` }))}
                             value={data.produk}
                             onChange={(val) => setData('produk', val)}
                             placeholder="Pilih Produk..."
@@ -236,6 +249,8 @@ function ItemList({ sj, listkode, total, onDelete, onSave }) {
                         <div className="text-muted" style={{ fontSize: '.75rem' }}>
                             Customer : <span className="font-weight-bold">{listkode.customer}</span>
                             {listkode.nomor_kendaraan && <span className="ml-3">Kendaraan : <span className="font-weight-bold">{listkode.nomor_kendaraan}</span></span>}
+                            {listkode.no_do && <span className="ml-3">No Do : <span className="font-weight-bold">{listkode.no_do}</span></span>}
+                            {listkode.gudang && <span className="ml-3">Gudang : <span className="font-weight-bold">{listkode.gudang}</span></span>}
                         </div>
                     </div>
                 )}

@@ -229,7 +229,7 @@ function InvoiceForm({ customer, produk, kode, listkode, bulan, tahun }) {
                         <div className="form-group">
                             <label className="small font-weight-bold text-uppercase">Produk</label>
                             <SearchableSelect
-                                options={produk.map((p) => ({ value: p.id, label: `${p.produk} - ${p.kemasan}kg (${p.kualitas})` }))}
+                                options={produk.map((p) => ({ value: p.id, label: `${p.produk} - ${p.kemasan}kg${p.kualitas ? ` (${p.kualitas})` : ''}` }))}
                                 value={data.produk}
                                 onChange={(val) => setData('produk', val)}
                                 placeholder="Pilih Produk..."

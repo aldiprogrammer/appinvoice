@@ -106,7 +106,7 @@ export default function Edit({ data: pageData, ls, customer, produk, list, total
                                         <div className="form-group">
                                             <label className="small font-weight-bold text-uppercase">Produk</label>
                                             <SearchableSelect
-                                                options={produk.map((p) => ({ value: p.id, label: `${p.produk} - ${p.kemasan}kg (${p.kualitas})` }))}
+                                                options={produk.map((p) => ({ value: p.id, label: `${p.produk} - ${p.kemasan}kg${p.kualitas ? ` (${p.kualitas})` : ''}` }))}
                                                 value={formData.produk}
                                                 onChange={(val) => setData('produk', val)}
                                                 placeholder="Pilih Produk..."

@@ -32,7 +32,10 @@
                             <tr><td class="py-[1px]">TANGGAL</td><td class="text-center py-[1px]">:</td><td class="py-[1px]">{{ date('d/m/Y', strtotime($cs->tanggal)) }}</td></tr>
                             <tr><td class="py-[1px]">PENERIMA</td><td class="text-center py-[1px]">:</td><td class="py-[0px]">{{ $cs->customer }}</td></tr>
                             <tr><td class="py-[1px]">ALAMAT</td><td class="text-center py-[1px]">:</td><td class="py-[1px]">{{ $cs->alamat }}</td></tr>
-                            {{-- <tr><td class="py-[1px]">NO. KENDARAAN</td><td class="text-center py-[1px]">:</td><td class="py-[1px]">{{ $cs->nomor_kendaraan ?? '-' }}</td></tr> --}}
+                            @if(!empty($cs->no_do))
+                            <tr><td class="py-[1px]">NO.DO</td><td class="text-center py-[1px]">:</td><td class="py-[1px]">{{ $cs->no_do }}</td></tr>
+                            @endif
+                            <tr><td class="py-[1px]">GUDANG</td><td class="text-center py-[1px]">:</td><td class="py-[1px]">{{ $cs->gudang ?? '-' }}</td></tr>
                         </table>
                     </div>
                 </div>

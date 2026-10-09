@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\Listsuratjalan;
 use App\Models\Nosj;
+use App\Models\Pengguna;
 use App\Models\Produk;
 use App\Models\Suratjalan;
 use Illuminate\Http\Request;
@@ -46,6 +47,8 @@ class SuratjalanController extends Controller
         $sj->customer = $cs->nama;
         $sj->alamat = $request->alamat;
         $sj->nomor_kendaraan = $request->nomor_kendaraan;
+        $sj->no_do = trim((string) $request->no_do);
+        $sj->gudang = $request->gudang === 'B' ? 'B' : 'A';
         $sj->id_produk = $request->produk;
         $sj->produk = $pr->produk;
         $sj->kemasan = $request->kemasan;
@@ -182,10 +185,7 @@ class SuratjalanController extends Controller
             $ls->status_cetak = 1;
             $ls->update();
         }
-        $nama_setujui = '';
-        if ($cek->userSetujui) {
-            $nama_setujui = ucwords(strtolower($cek->userSetujui->nama ?: $cek->userSetujui->username));
-        }
+        $nama_setujui = $this->namaTtd();
         $inv = Suratjalan::where('no_sj', $no_sj)->get();
         $cs = Suratjalan::where('no_sj', $no_sj)->with('customernew')->first();
         $grand_total = Suratjalan::where('no_sj', $no_sj)->sum('total_kg');
@@ -225,6 +225,8 @@ class SuratjalanController extends Controller
         $sj->customer = $cs->nama;
         $sj->alamat = $request->alamat;
         $sj->nomor_kendaraan = $request->nomor_kendaraan;
+        $sj->no_do = trim((string) $request->no_do);
+        $sj->gudang = $request->gudang === 'B' ? 'B' : 'A';
         $sj->id_produk = $request->produk;
         $sj->produk = $pr->produk;
         $sj->kemasan = $pr->kemasan;
@@ -248,10 +250,7 @@ class SuratjalanController extends Controller
         $cs = Suratjalan::where('no_sj', $no_sj)->with('customernew')->first();
         $grand_total = Suratjalan::where('no_sj', $no_sj)->sum('total_kg');
         $cek = Listsuratjalan::where('no_sj', $no_sj)->with('userSetujui')->first();
-        $nama_setujui = '';
-        if ($cek && $cek->userSetujui) {
-            $nama_setujui = ucwords(strtolower($cek->userSetujui->nama ?: $cek->userSetujui->username));
-        }
+        $nama_setujui = $this->namaTtd();
 
         return view('admin/review-sj-preview', compact('inv', 'grand_total', 'cs', 'nama_setujui'));
     }
@@ -270,5 +269,16 @@ class SuratjalanController extends Controller
         }
 
         return response()->json(['success' => true]);
+    }
+
+    private function namaTtd(): string
+    {
+        $user = Pengguna::find(session('id_user'));
+
+        if (! $user) {
+            return '';
+        }
+
+        return strtoupper($user->nama ?: $user->username);
     }
 }

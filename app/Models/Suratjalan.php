@@ -9,6 +9,7 @@ class Suratjalan extends Model
 {
     protected $fillable = [
         'no_sj', 'tanggal', 'id_customer', 'customer', 'alamat', 'nomor_kendaraan',
+        'no_do', 'gudang',
         'id_produk', 'produk', 'kemasan', 'harga', 'jml_sak', 'total_kg',
         'status_cetak', 'status',
     ];

@@ -6,6 +6,7 @@ export default function AppLayout({ children, title }) {
     const [collapsed, setCollapsed] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
     const [dropOpen, setDropOpen] = useState(false);
+    const [openFollowup, setOpenFollowup] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
     const [showError, setShowError] = useState(false);
     const [successMsg, setSuccessMsg] = useState('');
@@ -31,6 +32,13 @@ export default function AppLayout({ children, title }) {
 
     const isActive = (path) => currentPath === path || currentPath.startsWith(path + '/');
 
+    const followupActive = isActive('/ordercustomer') || isActive('/followup') || isActive('/kirim-notifikasi');
+    useEffect(() => {
+        if (followupActive) {
+            setOpenFollowup(true);
+        }
+    }, [currentPath]);
+
     const handleLogout = (e) => {
         e.preventDefault();
         router.get('/logout');
@@ -40,6 +48,17 @@ export default function AppLayout({ children, title }) {
         <Link
             href={href}
             className={`nav-side ${isActive(href) ? 'active' : ''}`}
+            onClick={() => setMobileOpen(false)}
+        >
+            <i className={`fas ${icon}`}></i>
+            <span className="sidebar-text">{label}</span>
+        </Link>
+    );
+
+    const subLink = (href, icon, label) => (
+        <Link
+            href={href}
+            className={`nav-side nav-sub ${isActive(href) ? 'active' : ''}`}
             onClick={() => setMobileOpen(false)}
         >
             <i className={`fas ${icon}`}></i>
@@ -68,7 +87,27 @@ export default function AppLayout({ children, title }) {
 
                     {(showAll || hasMenu('customer')) && navLink('/customer', 'fa-users', 'Customer')}
                     {(showAll || hasMenu('customermapping')) && navLink('/customer-mapping', 'fa-map-marker-alt', 'Customer Mapping')}
-                    {(showAll || hasMenu('ordercustomer')) && navLink('/ordercustomer', 'fa-shopping-cart', 'Order Customer')}
+                    {(showAll || hasMenu('ordercustomer') || hasMenu('followup') || hasMenu('kirimnotif')) && (
+                        <div>
+                            <div
+                                role="button"
+                                className={`nav-side ${followupActive ? 'active' : ''}`}
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => setOpenFollowup(!openFollowup)}
+                            >
+                                <i className="fas fa-headset"></i>
+                                <span className="sidebar-text">Followup Customer</span>
+                                <i className={`fas fa-chevron-${openFollowup ? 'down' : 'right'} sidebar-text`} style={{ width: 'auto', marginLeft: 'auto' }}></i>
+                            </div>
+                            {openFollowup && (
+                                <div className="nav-submenu">
+                                    {(showAll || hasMenu('ordercustomer')) && subLink('/ordercustomer', 'fa-shopping-cart', 'Order Customer')}
+                                    {(showAll || hasMenu('followup')) && subLink('/followup', 'fa-clock', 'Waktu Follow-up')}
+                                    {(showAll || hasMenu('kirimnotif')) && subLink('/kirim-notifikasi', 'fa-paper-plane', 'Kirim Notifikasi')}
+                                </div>
+                            )}
+                        </div>
+                    )}
                     {(showAll || hasMenu('produk')) && navLink('/produk', 'fa-box', 'Produk')}
                     {(showAll || hasMenu('bahanmasuk')) && navLink('/bahanmasuk', 'fa-cubes', 'Bahan Masuk')}
                     {(showAll || hasMenu('bahan')) && navLink('/bahan', 'fa-layer-group', 'Data Bahan')}

@@ -13,7 +13,7 @@ export default function Index({ produk }) {
 
     const filtered = produk.filter((p) =>
         p.produk.toLowerCase().includes(search.toLowerCase()) ||
-        p.kualitas.toLowerCase().includes(search.toLowerCase())
+        (p.kualitas || '').toLowerCase().includes(search.toLowerCase())
     );
     const totalPages = Math.ceil(filtered.length / perPage);
     const paginated = filtered.slice((currentPage - 1) * perPage, currentPage * perPage);
@@ -66,7 +66,7 @@ export default function Index({ produk }) {
                                     <td className="font-weight-bold">{item.produk}</td>
                                     <td><span className="badge badge-primary">{item.kemasan} kg</span></td>
                                     <td>Rp {Number(item.harga).toLocaleString('id-ID')}</td>
-                                    <td><span className={`badge ${kualitasBadge(item.kualitas)}`}>{item.kualitas}</span></td>
+                                    <td>{item.kualitas ? <span className={`badge ${kualitasBadge(item.kualitas)}`}>{item.kualitas}</span> : <span className="text-muted">-</span>}</td>
                                     <td>
                                         <div className="d-flex justify-content-center" style={{ gap: 0 }}>
                                             <button className="btn btn-primary btn-sm mr-1" onClick={() => setEditItem(item)}>
@@ -178,6 +178,7 @@ function ProdukModal({ item = null, onClose }) {
                                     <option value="40">40kg</option>
                                     <option value="45">45kg</option>
                                     <option value="50">50kg</option>
+                                    <option value="100">100kg</option>
                                 </select>
                             </div>
                             <div className="form-group mb-3">
@@ -186,8 +187,8 @@ function ProdukModal({ item = null, onClose }) {
                             </div>
                             <div className="form-group mb-0">
                                 <label className="small font-weight-bold">Kualitas</label>
-                                <select className="form-control" value={data.kualitas} onChange={(e) => setData('kualitas', e.target.value)} required>
-                                    <option value="" disabled>Pilih kualitas</option>
+                                <select className="form-control" value={data.kualitas} onChange={(e) => setData('kualitas', e.target.value)}>
+                                    <option value="">- Tidak ada -</option>
                                     <option>Super premium</option>
                                     <option>Premium</option>
                                     <option>Medium</option>
