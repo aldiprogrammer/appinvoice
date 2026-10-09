@@ -20,7 +20,20 @@ createInertiaApp({
 });
 
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch(() => {});
+    window.addEventListener('load', async () => {
+        try {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(
+                registrations
+                    .filter((reg) => {
+                        const url = reg.active?.scriptURL || reg.waiting?.scriptURL || reg.installing?.scriptURL || '';
+                        return url.endsWith('/sw.js');
+                    })
+                    .map((reg) => reg.unregister()),
+            );
+            await navigator.serviceWorker.register('/OneSignalSDKWorker.js');
+        } catch (e) {
+            /* noop */
+        }
     });
 }

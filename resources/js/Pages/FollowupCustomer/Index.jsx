@@ -5,38 +5,41 @@ const ONESIGNAL_SDK = 'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.
 
 function initOneSignal(appId) {
     if (typeof window === 'undefined' || !appId) return Promise.resolve(null);
-    if (!window.__oneSignalPromise) {
-        window.__oneSignalPromise = new Promise((resolve, reject) => {
-            window.OneSignalDeferred = window.OneSignalDeferred || [];
-            if (!document.querySelector(`script[src="${ONESIGNAL_SDK}"]`)) {
-                const script = document.createElement('script');
-                script.src = ONESIGNAL_SDK;
-                script.defer = true;
-                script.onerror = () => {
-                    window.__oneSignalPromise = null;
-                    reject(new Error('Gagal memuat SDK OneSignal. Cek koneksi internet.'));
-                };
-                document.head.appendChild(script);
-            }
-            window.OneSignalDeferred.push(async (OneSignal) => {
-                try {
-                    const timeout = setTimeout(() => {
-                        window.__oneSignalPromise = null;
-                        reject(new Error('Inisialisasi OneSignal timeout. Pastikan App ID & Site URL di dashboard OneSignal benar.'));
-                    }, 15000);
-                    await OneSignal.init({
-                        appId,
-                        allowLocalhostAsSecureOrigin: true,
-                    });
-                    clearTimeout(timeout);
-                    resolve(OneSignal);
-                } catch (e) {
+    if (window.__oneSignalInstance) return Promise.resolve(window.__oneSignalInstance);
+    if (window.__oneSignalPromise) return window.__oneSignalPromise;
+
+    window.__oneSignalPromise = new Promise((resolve, reject) => {
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        if (!document.querySelector(`script[src="${ONESIGNAL_SDK}"]`)) {
+            const script = document.createElement('script');
+            script.src = ONESIGNAL_SDK;
+            script.defer = true;
+            script.onerror = () => {
+                window.__oneSignalPromise = null;
+                reject(new Error('Gagal memuat SDK OneSignal. Cek koneksi internet.'));
+            };
+            document.head.appendChild(script);
+        }
+        window.OneSignalDeferred.push(async (OneSignal) => {
+            try {
+                await OneSignal.init({
+                    appId,
+                    allowLocalhostAsSecureOrigin: true,
+                    serviceWorkerPath: 'OneSignalSDKWorker.js',
+                    serviceWorkerParam: { scope: '/' },
+                });
+            } catch (e) {
+                if (!/already initialized/i.test((e && e.message) || '')) {
                     window.__oneSignalPromise = null;
                     reject(e);
+                    return;
                 }
-            });
+            }
+            window.__oneSignalInstance = OneSignal;
+            resolve(OneSignal);
         });
-    }
+    });
+
     return window.__oneSignalPromise;
 }
 
@@ -44,6 +47,7 @@ export default function Index({ jmlCustomer = 0, jmlOrder = 0, followups = [] })
     const onesignalAppId = import.meta.env.VITE_ONESIGNAL_APP_ID;
     const [osReady, setOsReady] = useState(false);
     const [permission, setPermission] = useState(false);
+    const [subscribed, setSubscribed] = useState(false);
     const [enabling, setEnabling] = useState(false);
     const [osError, setOsError] = useState('');
     const [diag, setDiag] = useState(null);
@@ -66,6 +70,16 @@ export default function Index({ jmlCustomer = 0, jmlOrder = 0, followups = [] })
         }
     };
 
+    const syncStatus = (OneSignal) => {
+        try {
+            setPermission(OneSignal.Notifications.permission);
+            setSubscribed(OneSignal.User.PushSubscription.optedIn && !!OneSignal.User.PushSubscription.id);
+        } catch (e) {
+            /* ignore */
+        }
+        refreshDiag(OneSignal);
+    };
+
     useEffect(() => {
         if (!onesignalAppId) return;
         let mounted = true;
@@ -74,10 +88,12 @@ export default function Index({ jmlCustomer = 0, jmlOrder = 0, followups = [] })
                 if (!mounted || !OneSignal) return;
                 setOsReady(true);
                 setOsError('');
-                setPermission(OneSignal.Notifications.permission);
-                refreshDiag(OneSignal);
-                OneSignal.Notifications.addEventListener('permissionChange', (granted) => {
-                    if (mounted) setPermission(granted);
+                syncStatus(OneSignal);
+                OneSignal.Notifications.addEventListener('permissionChange', () => {
+                    if (mounted) syncStatus(OneSignal);
+                });
+                OneSignal.User.PushSubscription.addEventListener('change', () => {
+                    if (mounted) syncStatus(OneSignal);
                 });
             })
             .catch((e) => {
@@ -122,12 +138,14 @@ export default function Index({ jmlCustomer = 0, jmlOrder = 0, followups = [] })
             const OneSignal = await initOneSignal(onesignalAppId);
             if (!OneSignal) return;
             setOsReady(true);
-            const granted = await OneSignal.Notifications.requestPermission();
-            setPermission(OneSignal.Notifications.permission);
-            if (granted) {
-                await OneSignal.Notifications.optIn();
+            let granted = OneSignal.Notifications.permission;
+            if (!granted) {
+                granted = await OneSignal.Notifications.requestPermission();
             }
-            refreshDiag(OneSignal);
+            if (granted) {
+                await OneSignal.User.PushSubscription.optIn();
+            }
+            syncStatus(OneSignal);
         } catch (e) {
             console.error('OneSignal error:', e);
             setOsError((e && e.message) || 'Gagal mengaktifkan notifikasi. Lihat console browser.');
@@ -135,6 +153,25 @@ export default function Index({ jmlCustomer = 0, jmlOrder = 0, followups = [] })
             setEnabling(false);
         }
     };
+
+    const disableNotifications = async () => {
+        if (!onesignalAppId || enabling) return;
+        setEnabling(true);
+        setOsError('');
+        try {
+            const OneSignal = await initOneSignal(onesignalAppId);
+            if (!OneSignal) return;
+            await OneSignal.User.PushSubscription.optOut();
+            syncStatus(OneSignal);
+        } catch (e) {
+            console.error('OneSignal error:', e);
+            setOsError((e && e.message) || 'Gagal menonaktifkan notifikasi. Lihat console browser.');
+        } finally {
+            setEnabling(false);
+        }
+    };
+
+    const active = permission && subscribed;
 
     const stats = [
         { label: 'Jumlah Customer', value: jmlCustomer, icon: 'fa-users', grad: 'linear-gradient(135deg,#10b981,#059669)', sub: 'Customer terdaftar' },
@@ -238,6 +275,12 @@ export default function Index({ jmlCustomer = 0, jmlOrder = 0, followups = [] })
                     cursor: pointer;
                 }
                 .fc-notif-btn:disabled { opacity: .6; cursor: not-allowed; box-shadow: none; }
+                .fc-notif-btn-off {
+                    background: #fff;
+                    color: #b91c1c;
+                    border: 1px solid #fecaca;
+                    box-shadow: none;
+                }
                 .fc-install {
                     margin-top: 16px;
                     background: linear-gradient(135deg,#eef2ff,#e0e7ff);
@@ -389,6 +432,17 @@ export default function Index({ jmlCustomer = 0, jmlOrder = 0, followups = [] })
                 </div>
 
                 <div className="fc-content">
+                    <div className="fc-stats">
+                        {stats.map((s, i) => (
+                            <div key={i} className="fc-stat" style={{ background: s.grad }}>
+                                <div className="fc-stat-icon"><i className={`fas ${s.icon}`}></i></div>
+                                <div className="fc-stat-value">{s.value}</div>
+                                <div className="fc-stat-label">{s.label}</div>
+                                <div className="fc-stat-sub">{s.sub}</div>
+                            </div>
+                        ))}
+                    </div>
+
                     {!isStandalone && (installEvent || isIos) && (
                         <div className="fc-install">
                             <div className="fc-install-icon"><i className="fas fa-mobile-alt"></i></div>
@@ -407,43 +461,45 @@ export default function Index({ jmlCustomer = 0, jmlOrder = 0, followups = [] })
                             )}
                         </div>
                     )}
-                    <div className="fc-stats">
-                        {stats.map((s, i) => (
-                            <div key={i} className="fc-stat" style={{ background: s.grad }}>
-                                <div className="fc-stat-icon"><i className={`fas ${s.icon}`}></i></div>
-                                <div className="fc-stat-value">{s.value}</div>
-                                <div className="fc-stat-label">{s.label}</div>
-                                <div className="fc-stat-sub">{s.sub}</div>
-                            </div>
-                        ))}
-                    </div>
 
                     <div className="fc-notif">
-                        <div className={`fc-notif-icon ${permission ? 'is-on' : ''}`}>
-                            <i className={`fas ${permission ? 'fa-bell' : 'fa-bell-slash'}`}></i>
+                        <div className={`fc-notif-icon ${active ? 'is-on' : ''}`}>
+                            <i className={`fas ${active ? 'fa-bell' : 'fa-bell-slash'}`}></i>
                         </div>
                         <div className="fc-notif-body">
                             <p className="fc-notif-title">
-                                {permission ? 'Notifikasi Aktif' : 'Notifikasi Follow-up'}
+                                {active ? 'Notifikasi Aktif' : 'Notifikasi Follow-up'}
                             </p>
                             <p className="fc-notif-sub">
                                 {!onesignalAppId
                                     ? 'OneSignal belum dikonfigurasi (isi VITE_ONESIGNAL_APP_ID).'
-                                    : permission
+                                    : active
                                         ? 'Anda akan menerima notifikasi follow-up customer.'
                                         : !osReady
                                             ? 'Memuat OneSignal...'
-                                            : 'Aktifkan untuk menerima notifikasi follow-up customer.'}
+                                            : permission
+                                                ? 'Perangkat diizinkan, tapi belum berlangganan. Aktifkan ulang.'
+                                                : 'Aktifkan untuk menerima notifikasi follow-up customer.'}
                             </p>
                         </div>
-                        {onesignalAppId && !permission && (
+                        {onesignalAppId && !active && (
                             <button
                                 type="button"
                                 className="fc-notif-btn"
                                 onClick={enableNotifications}
                                 disabled={enabling}
                             >
-                                {enabling ? 'Memproses...' : 'Aktifkan'}
+                                {enabling ? 'Memproses...' : permission ? 'Aktifkan ulang' : 'Aktifkan'}
+                            </button>
+                        )}
+                        {onesignalAppId && active && (
+                            <button
+                                type="button"
+                                className="fc-notif-btn fc-notif-btn-off"
+                                onClick={disableNotifications}
+                                disabled={enabling}
+                            >
+                                Nonaktifkan
                             </button>
                         )}
                     </div>

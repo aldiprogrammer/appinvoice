@@ -23,3 +23,14 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# PWA manifest
+AddType application/manifest+json .webmanifest
+
+# Service workers (PWA + OneSignal): always revalidate + allow root scope
+<FilesMatch "(sw\.js|OneSignalSDKWorker\.js)$">
+    <IfModule mod_headers.c>
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Service-Worker-Allowed "/"
+    </IfModule>
+</FilesMatch>
