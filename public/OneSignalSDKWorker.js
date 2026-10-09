@@ -1,6 +1,6 @@
 importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
 
-const CACHE = 'ptsan-pwa-v1';
+const CACHE = 'ptsan-pwa-v2';
 const START_URL = '/follow-up-customer';
 const SHELL = [
     START_URL,
