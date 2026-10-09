@@ -1,20 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
-import GuestLayout from '../Layouts/GuestLayout';
-
-const menus = [
-    { label: 'Invoice', desc: 'Buat & kelola invoice', icon: 'fa-file-invoice', grad: 'linear-gradient(135deg,#34d399,#059669)', url: '/login/invoice' },
-    { label: 'Surat Jalan', desc: 'Kelola surat jalan', icon: 'fa-truck', grad: 'linear-gradient(135deg,#fbbf24,#d97706)', url: '/login/suratjalan' },
-    { label: 'Inventaris', desc: 'Stok & data barang', icon: 'fa-boxes', grad: 'linear-gradient(135deg,#a78bfa,#7c3aed)', url: '/login/inventaris' },
-    { label: 'Mapping Customer', desc: 'Peta & lokasi toko', icon: 'fa-map-marked-alt', grad: 'linear-gradient(135deg,#3b82f6,#2563eb)', url: '/peta-customer' },
-    { label: 'Follow-up Customer', desc: 'Pantau & notifikasi', icon: 'fa-headset', grad: 'linear-gradient(135deg,#2dd4bf,#0d9488)', url: '/follow-up-customer' },
-    { label: 'Admin', desc: 'Pengguna & hak akses', icon: 'fa-user-shield', grad: 'linear-gradient(135deg,#f87171,#dc2626)', url: '/login/admin' },
-];
-
-export default function Menu() {
-    return (
-        <GuestLayout>
-            <Head title="Menu" />
-            <style>{`
+import{j as e,H as i,L as n}from"./app-CLF2YYxa.js";import{G as t}from"./GuestLayout-By5tKqW-.js";/* empty css            */const o=[{label:"Invoice",desc:"Buat & kelola invoice",icon:"fa-file-invoice",grad:"linear-gradient(135deg,#34d399,#059669)",url:"/login/invoice"},{label:"Surat Jalan",desc:"Kelola surat jalan",icon:"fa-truck",grad:"linear-gradient(135deg,#fbbf24,#d97706)",url:"/login/suratjalan"},{label:"Inventaris",desc:"Stok & data barang",icon:"fa-boxes",grad:"linear-gradient(135deg,#a78bfa,#7c3aed)",url:"/login/inventaris"},{label:"Mapping Customer",desc:"Peta & lokasi toko",icon:"fa-map-marked-alt",grad:"linear-gradient(135deg,#3b82f6,#2563eb)",url:"/peta-customer"},{label:"Follow-up Customer",desc:"Pantau & notifikasi",icon:"fa-headset",grad:"linear-gradient(135deg,#2dd4bf,#0d9488)",url:"/follow-up-customer"},{label:"Admin",desc:"Pengguna & hak akses",icon:"fa-user-shield",grad:"linear-gradient(135deg,#f87171,#dc2626)",url:"/login/admin"}];function c(){return e.jsxs(t,{children:[e.jsx(i,{title:"Menu"}),e.jsx("style",{children:`
                 .menu-wrap { width: 100%; max-width: 660px; margin: 0 auto; }
                 .menu-logo {
                     width: 88px; height: 88px; border-radius: 24px;
@@ -69,32 +53,4 @@ export default function Menu() {
                 .menu-card-desc { font-size: .72rem; color: #64748b; line-height: 1.3; margin-top: -4px; }
                 .menu-card-arrow { position: absolute; right: 14px; bottom: 12px; color: #cbd5e1; font-size: .78rem; }
                 .menu-foot { text-align: center; color: rgba(255,255,255,.45); font-size: .72rem; margin-top: 26px; }
-            `}</style>
-
-            <div className="menu-wrap text-center">
-                <div className="menu-logo">
-                    <img src="/img/logoptsan.png" alt="PT Sinar Aneka Niaga" />
-                </div>
-                <span className="menu-badge">Management System</span>
-                <h1 className="menu-brand">PT. Sinar Aneka Niaga</h1>
-                <div className="menu-divider"></div>
-                <p className="menu-sub">Silakan pilih menu layanan di bawah ini</p>
-
-                <div className="menu-grid">
-                    {menus.map((menu, idx) => (
-                        <Link key={idx} href={menu.url} className="menu-card-item">
-                            <div className="menu-card-icon" style={{ background: menu.grad }}>
-                                <i className={`fas ${menu.icon}`}></i>
-                            </div>
-                            <span className="menu-card-label">{menu.label}</span>
-                            <span className="menu-card-desc">{menu.desc}</span>
-                            <i className="fas fa-chevron-right menu-card-arrow"></i>
-                        </Link>
-                    ))}
-                </div>
-
-                <p className="menu-foot">&copy; {new Date().getFullYear()} PTSAN &middot; Management System</p>
-            </div>
-        </GuestLayout>
-    );
-}
+            `}),e.jsxs("div",{className:"menu-wrap text-center",children:[e.jsx("div",{className:"menu-logo",children:e.jsx("img",{src:"/img/logoptsan.png",alt:"PT Sinar Aneka Niaga"})}),e.jsx("span",{className:"menu-badge",children:"Management System"}),e.jsx("h1",{className:"menu-brand",children:"PT. Sinar Aneka Niaga"}),e.jsx("div",{className:"menu-divider"}),e.jsx("p",{className:"menu-sub",children:"Silakan pilih menu layanan di bawah ini"}),e.jsx("div",{className:"menu-grid",children:o.map((a,r)=>e.jsxs(n,{href:a.url,className:"menu-card-item",children:[e.jsx("div",{className:"menu-card-icon",style:{background:a.grad},children:e.jsx("i",{className:`fas ${a.icon}`})}),e.jsx("span",{className:"menu-card-label",children:a.label}),e.jsx("span",{className:"menu-card-desc",children:a.desc}),e.jsx("i",{className:"fas fa-chevron-right menu-card-arrow"})]},r))}),e.jsxs("p",{className:"menu-foot",children:["© ",new Date().getFullYear()," PTSAN · Management System"]})]})]})}export{c as default};

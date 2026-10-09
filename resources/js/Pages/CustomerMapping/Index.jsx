@@ -22,6 +22,25 @@ export default function Index({ mappings, produkOptions = [] }) {
     return (
         <AppLayout title="Customer Mapping">
             <Head title="Customer Mapping" />
+            <style>{`
+                .cm-card {
+                    background: #fff; border: 1px solid #e5e7eb; border-radius: 14px;
+                    padding: 14px; margin-bottom: 12px;
+                    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+                }
+                .cm-avatar {
+                    width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+                    display: flex; align-items: center; justify-content: center;
+                    background: linear-gradient(135deg,#3b82f6,#2563eb);
+                    color: #fff; font-weight: 700; font-size: 1.1rem;
+                }
+                .cm-title { font-weight: 700; font-size: .95rem; color: #0f172a; line-height: 1.2; }
+                .cm-sub {
+                    font-size: .78rem; color: #64748b; line-height: 1.3;
+                    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+                }
+                .cm-coord { font-size: .72rem; color: #64748b; font-variant-numeric: tabular-nums; }
+            `}</style>
             <div className="card bg-white border mb-3" style={{ borderColor: '#e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,.05)', padding: '1.5rem' }}>
                 <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between mb-4" style={{ gap: 12 }}>
                     <div>
@@ -46,8 +65,8 @@ export default function Index({ mappings, produkOptions = [] }) {
                     />
                 </div>
 
-                {/* Table */}
-                <div className="table-responsive">
+                {/* Table (desktop) */}
+                <div className="table-responsive d-none d-md-block">
                     <table className="table table-striped table-sm w-100 mb-0">
                         <thead style={{ background: '#3b82f6' }}>
                             <tr>
@@ -99,9 +118,45 @@ export default function Index({ mappings, produkOptions = [] }) {
                     </table>
                 </div>
 
+                {/* Cards (mobile) */}
+                <div className="d-md-none">
+                    {paginated.length === 0 ? (
+                        <div className="text-center text-muted py-4">Tidak ada data</div>
+                    ) : paginated.map((item) => (
+                        <div key={item.id} className="cm-card">
+                            <div className="d-flex align-items-start justify-content-between" style={{ gap: 10 }}>
+                                <div className="d-flex align-items-center" style={{ gap: 10, minWidth: 0 }}>
+                                    <div className="cm-avatar">{(item.nama_toko || '?').charAt(0).toUpperCase()}</div>
+                                    <div style={{ minWidth: 0 }}>
+                                        <div className="cm-title">{item.nama_toko}</div>
+                                        <div className="cm-sub">{item.alamat || '-'}</div>
+                                    </div>
+                                </div>
+                                <span className={`badge ${item.status === 'Aktif' ? 'badge-success' : 'badge-secondary'}`} style={{ flexShrink: 0 }}>{item.status}</span>
+                            </div>
+
+                            <div className="d-flex flex-wrap mt-2" style={{ gap: 4 }}>
+                                {splitProduk(item.produk).length === 0
+                                    ? <span className="text-muted small">-</span>
+                                    : splitProduk(item.produk).map((p) => <span key={p} className="badge badge-primary">{p}</span>)}
+                            </div>
+
+                            <div className="d-flex align-items-center justify-content-between mt-3">
+                                <div className="cm-coord">
+                                    <i className="fas fa-map-marker-alt mr-1"></i>{item.latitude ?? '-'}, {item.longitude ?? '-'}
+                                </div>
+                                <div className="d-flex" style={{ gap: 6 }}>
+                                    <button className="btn btn-primary btn-sm" onClick={() => setEditItem(item)}>Edit</button>
+                                    <button className="btn btn-danger btn-sm" onClick={() => setDeleteItem(item)}>Hapus</button>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
                 {/* Pagination */}
                 {totalPages > 1 && (
-                    <div className="d-flex justify-content-between align-items-center mt-4">
+                    <div className="d-flex flex-wrap justify-content-between align-items-center mt-4" style={{ gap: 8 }}>
                         <span className="small text-muted">Menampilkan {(currentPage-1)*perPage+1}-{Math.min(currentPage*perPage, filtered.length)} dari {filtered.length} data</span>
                         <ul className="pagination pagination-sm mb-0">
                             <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}><button className="page-link" disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}>«</button></li>
