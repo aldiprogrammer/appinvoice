@@ -6,10 +6,10 @@ use App\Exports\OrderCustomerTemplate;
 use App\Http\Controllers\Controller;
 use App\Imports\OrderCustomerImport;
 use App\Models\Ordercustomer;
+use App\Services\FollowupService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
-use Throwable;
 
 class OrderCustomerController extends Controller
 {
@@ -55,6 +55,19 @@ class OrderCustomerController extends Controller
         return redirect()->route('ordercustomer')->with('success', 'Data order customer berhasil dihapus');
     }
 
+    public function deleteAll()
+    {
+        $count = Ordercustomer::count();
+
+        if ($count === 0) {
+            return redirect()->route('ordercustomer')->with('error', 'Tidak ada data untuk dihapus');
+        }
+
+        Ordercustomer::query()->delete();
+
+        return redirect()->route('ordercustomer')->with('success', $count.' data order customer berhasil dihapus');
+    }
+
     public function import(Request $request)
     {
         $request->validate([
@@ -93,6 +106,17 @@ class OrderCustomerController extends Controller
     public function template()
     {
         return Excel::download(new OrderCustomerTemplate, 'template-order-customer.xlsx');
+    }
+
+    public function followupList(FollowupService $followup)
+    {
+        $config = $followup->config();
+
+        return Inertia::render('FollowupList/Index', [
+            'customers' => $followup->list($config['waktu']),
+            'waktu' => $config['waktu'],
+            'status' => $config['status'],
+        ]);
     }
 
     private function validated(Request $request): array

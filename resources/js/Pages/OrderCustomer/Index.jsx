@@ -20,16 +20,73 @@ const FIELDS = [
 
 const COLUMNS = FIELDS.map((f) => ({ key: f.key, label: f.label }));
 
+const BULAN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+function parseTanggal(value) {
+    const v = (value || '').toString().trim();
+    if (!v) return null;
+    let m = v.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
+    if (m) return `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`;
+    m = v.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
+    if (m) return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+    const d = new Date(v);
+    if (!isNaN(d.getTime())) return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return null;
+}
+
+function parseMonth(value) {
+    const full = parseTanggal(value);
+    return full ? full.slice(0, 7) : null;
+}
+
+function formatBulan(ym) {
+    const [y, m] = ym.split('-');
+    return `${BULAN[parseInt(m, 10) - 1]} ${y}`;
+}
+
+function parseJumlah(value) {
+    const n = parseFloat((value || '').toString().replace(/[^\d.-]/g, ''));
+    return isNaN(n) ? 0 : n;
+}
+
+const angka = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 });
+
 export default function Index({ orders }) {
     const [search, setSearch] = useState('');
+    const [bulan, setBulan] = useState('');
+    const [tanggalAwal, setTanggalAwal] = useState('');
+    const [tanggalSelesai, setTanggalSelesai] = useState('');
     const [addOpen, setAddOpen] = useState(false);
     const [importOpen, setImportOpen] = useState(false);
     const [editItem, setEditItem] = useState(null);
     const [deleteItem, setDeleteItem] = useState(null);
+    const [deleteAllOpen, setDeleteAllOpen] = useState(false);
+    const [deletingAll, setDeletingAll] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const perPage = 10;
 
-    const filtered = orders.filter((o) =>
+    const bulanOptions = Array.from({ length: 12 }, (_, i) =>
+        `${new Date().getFullYear()}-${String(i + 1).padStart(2, '0')}`
+    );
+
+    const inRange = (o) => {
+        if (!tanggalAwal && !tanggalSelesai) return true;
+        const t = parseTanggal(o.tanggal);
+        if (!t) return false;
+        if (tanggalAwal && t < tanggalAwal) return false;
+        if (tanggalSelesai && t > tanggalSelesai) return false;
+        return true;
+    };
+
+    const dateFiltered = orders.filter((o) => inRange(o));
+
+    const bulanFiltered = bulan
+        ? dateFiltered.filter((o) => parseMonth(o.tanggal) === bulan)
+        : dateFiltered;
+
+    const totalKg = bulanFiltered.reduce((sum, o) => sum + parseJumlah(o.total_kg), 0);
+
+    const filtered = bulanFiltered.filter((o) =>
         COLUMNS.some((c) => (o[c.key] || '').toString().toLowerCase().includes(search.toLowerCase()))
     );
     const totalPages = Math.ceil(filtered.length / perPage);
@@ -51,6 +108,11 @@ export default function Index({ orders }) {
                         <button className="btn btn-outline-success" onClick={() => setImportOpen(true)}>
                             <i className="fas fa-file-excel mr-2"></i>Import Excel
                         </button>
+                        {orders.length > 0 && (
+                            <button className="btn btn-outline-danger" onClick={() => setDeleteAllOpen(true)}>
+                                <i className="fas fa-trash-alt mr-2"></i>Hapus Semua
+                            </button>
+                        )}
                         <button className="btn btn-primary" onClick={() => setAddOpen(true)}>
                             <svg className="mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width: 16, height: 16 }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                             Tambah Data
@@ -58,8 +120,70 @@ export default function Index({ orders }) {
                     </div>
                 </div>
 
-                {/* Search */}
+                {/* Penjualan per Bulan */}
+                <div className="d-flex flex-column flex-md-row mb-4" style={{ gap: 12 }}>
+                    <div className="card flex-fill mb-0" style={{ borderColor: '#e5e7eb', background: '#eff6ff' }}>
+                        <div className="card-body d-flex align-items-center" style={{ gap: 12 }}>
+                            <div className="d-flex align-items-center justify-content-center" style={{ width: 44, height: 44, borderRadius: '.5rem', background: '#3b82f6' }}>
+                                <i className="fas fa-weight-hanging" style={{ color: '#fff', fontSize: 18 }}></i>
+                            </div>
+                            <div>
+                                <div className="small text-muted">Total Kg {bulan ? `- ${formatBulan(bulan)}` : '(Semua Bulan)'}</div>
+                                <div className="font-weight-bold" style={{ fontSize: '1.25rem' }}>{angka.format(totalKg)} Kg</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="card flex-fill mb-0" style={{ borderColor: '#e5e7eb', background: '#f0fdf4' }}>
+                        <div className="card-body d-flex align-items-center" style={{ gap: 12 }}>
+                            <div className="d-flex align-items-center justify-content-center" style={{ width: 44, height: 44, borderRadius: '.5rem', background: '#16a34a' }}>
+                                <i className="fas fa-shopping-cart" style={{ color: '#fff', fontSize: 18 }}></i>
+                            </div>
+                            <div>
+                                <div className="small text-muted">Jumlah Order {bulan ? `- ${formatBulan(bulan)}` : '(Semua Bulan)'}</div>
+                                <div className="font-weight-bold" style={{ fontSize: '1.25rem' }}>{bulanFiltered.length} order</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Search & Filter */}
                 <div className="mb-4">
+                    <div className="d-flex flex-column flex-sm-row mb-3" style={{ gap: 12 }}>
+                        <select
+                            className="form-control"
+                            style={{ maxWidth: 220 }}
+                            value={bulan}
+                            onChange={(e) => { setBulan(e.target.value); setCurrentPage(1); }}
+                        >
+                            <option value="">Semua Bulan</option>
+                            {bulanOptions.map((ym) => (
+                                <option key={ym} value={ym}>{formatBulan(ym)}</option>
+                            ))}
+                        </select>
+                        <div className="d-flex align-items-center" style={{ gap: 8 }}>
+                            <label className="small font-weight-bold mb-0">Tanggal Awal</label>
+                            <input
+                                type="date"
+                                className="form-control"
+                                style={{ maxWidth: 180 }}
+                                value={tanggalAwal}
+                                onChange={(e) => { setTanggalAwal(e.target.value); setCurrentPage(1); }}
+                            />
+                            <label className="small font-weight-bold mb-0">s/d</label>
+                            <input
+                                type="date"
+                                className="form-control"
+                                style={{ maxWidth: 180 }}
+                                value={tanggalSelesai}
+                                onChange={(e) => { setTanggalSelesai(e.target.value); setCurrentPage(1); }}
+                            />
+                        </div>
+                        {(tanggalAwal || tanggalSelesai) && (
+                            <button className="btn btn-outline-secondary" onClick={() => { setTanggalAwal(''); setTanggalSelesai(''); setCurrentPage(1); }}>
+                                <i className="fas fa-times mr-2"></i>Reset Tanggal
+                            </button>
+                        )}
+                    </div>
                     <input
                         type="text"
                         placeholder="Cari data order..."
@@ -147,6 +271,33 @@ export default function Index({ orders }) {
                             <div className="modal-footer justify-content-center">
                                 <button className="btn btn-light" onClick={() => setDeleteItem(null)}>Batal</button>
                                 <button className="btn btn-danger" onClick={(e) => { e.stopPropagation(); router.delete(`/ordercustomer/${deleteItem.id}`, { onFinish: () => setDeleteItem(null) }); }}>Hapus</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete All Modal */}
+            {deleteAllOpen && (
+                <div className="modal d-block" style={{ zIndex: 1050, background: 'rgba(0,0,0,.5)', overflowY: 'auto' }} onClick={() => !deletingAll && setDeleteAllOpen(false)}>
+                    <div className="modal-dialog modal-dialog-centered" role="document" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-content">
+                            <div className="modal-body text-center" style={{ paddingTop: '2rem' }}>
+                                <div className="d-flex align-items-center justify-content-center mx-auto mb-4" style={{ width: 60, height: 60, borderRadius: '50%', background: 'rgba(220,53,69,.1)' }}>
+                                    <i className="fas fa-exclamation-triangle" style={{ color: '#dc3545', fontSize: 28 }}></i>
+                                </div>
+                                <h5 className="font-weight-bold" style={{ fontSize: '1.125rem' }}>Hapus Semua Data</h5>
+                                <p className="mt-2 mb-1" style={{ color: 'rgba(0,0,0,.6)' }}>
+                                    Anda akan menghapus <b>{orders.length}</b> data order customer sekaligus.
+                                </p>
+                                <p className="small text-danger font-weight-bold mb-0">Tindakan ini tidak dapat dibatalkan.</p>
+                            </div>
+                            <div className="modal-footer justify-content-center">
+                                <button className="btn btn-light" disabled={deletingAll} onClick={() => setDeleteAllOpen(false)}>Batal</button>
+                                <button className="btn btn-danger" disabled={deletingAll} onClick={(e) => { e.stopPropagation(); setDeletingAll(true); router.delete('/ordercustomer/all', { onFinish: () => { setDeletingAll(false); setDeleteAllOpen(false); setCurrentPage(1); } }); }}>
+                                    {deletingAll && <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true" />}
+                                    Ya, Hapus Semua
+                                </button>
                             </div>
                         </div>
                     </div>

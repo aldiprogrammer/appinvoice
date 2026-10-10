@@ -2,18 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Customer;
 use App\Models\Ordercustomer;
+use App\Services\FollowupService;
 use Inertia\Inertia;
 
 class FollowupCustomerController extends Controller
 {
-    public function index()
+    public function index(FollowupService $followup)
     {
-        $jmlCustomer = Customer::count();
-        $jmlOrder = Ordercustomer::count();
-        $followups = [];
+        $config = $followup->config();
 
-        return Inertia::render('FollowupCustomer/Index', compact('jmlCustomer', 'jmlOrder', 'followups'));
+        return Inertia::render('FollowupCustomer/Index', [
+            'jmlOrder' => Ordercustomer::count(),
+            'followups' => $followup->list($config['waktu']),
+            'waktu' => $config['waktu'],
+            'status' => $config['status'],
+        ]);
     }
 }

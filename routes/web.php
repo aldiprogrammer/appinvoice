@@ -14,6 +14,7 @@ use App\Http\Controllers\admin\OrderCustomerController;
 use App\Http\Controllers\admin\PenggunaController;
 use App\Http\Controllers\admin\ProdukController;
 use App\Http\Controllers\admin\SuratjalanController;
+use App\Http\Controllers\CronjobController;
 use App\Http\Controllers\FollowupCustomerController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PetaCustomerController;
@@ -27,6 +28,8 @@ Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/peta-customer', [PetaCustomerController::class, 'index'])->name('peta.customer');
 Route::get('/follow-up-customer', [FollowupCustomerController::class, 'index'])->name('followupcustomer');
+
+Route::get('/cronjob', [CronjobController::class, 'index'])->name('cronjob');
 
 Route::middleware([Ceklogin::class])->group(function () {
 
@@ -47,6 +50,7 @@ Route::middleware([Ceklogin::class])->group(function () {
     Route::post('/ordercustomer', [OrderCustomerController::class, 'store'])->name('ordercustomer.store');
     Route::post('/ordercustomer/import', [OrderCustomerController::class, 'import'])->name('ordercustomer.import');
     Route::put('/ordercustomer/{id}', [OrderCustomerController::class, 'update'])->name('ordercustomer.update');
+    Route::delete('/ordercustomer/all', [OrderCustomerController::class, 'deleteAll'])->name('ordercustomer.deleteAll');
     Route::delete('/ordercustomer/{id}', [OrderCustomerController::class, 'delete'])->name('ordercustomer.delete');
 
     Route::get('/produk', [ProdukController::class, 'index'])->name('produk');
@@ -106,6 +110,7 @@ Route::middleware([Ceklogin::class])->group(function () {
 
     Route::get('/followup', [FollowupController::class, 'index'])->name('followup');
     Route::post('/followup', [FollowupController::class, 'store'])->name('followup.store');
+    Route::get('/daftar-followup', [OrderCustomerController::class, 'followupList'])->name('followup.list');
 
     Route::get('/kirim-notifikasi', [NotifikasiController::class, 'index'])->name('kirimnotifikasi');
     Route::post('/kirim-notifikasi', [NotifikasiController::class, 'send'])->name('kirimnotifikasi.send');

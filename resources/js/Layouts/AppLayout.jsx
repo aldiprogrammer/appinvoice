@@ -32,7 +32,7 @@ export default function AppLayout({ children, title }) {
 
     const isActive = (path) => currentPath === path || currentPath.startsWith(path + '/');
 
-    const followupActive = isActive('/ordercustomer') || isActive('/followup') || isActive('/kirim-notifikasi');
+    const followupActive = isActive('/ordercustomer') || isActive('/followup') || isActive('/daftar-followup') || isActive('/kirim-notifikasi');
     useEffect(() => {
         if (followupActive) {
             setOpenFollowup(true);
@@ -103,6 +103,7 @@ export default function AppLayout({ children, title }) {
                                 <div className="nav-submenu">
                                     {(showAll || hasMenu('ordercustomer')) && subLink('/ordercustomer', 'fa-shopping-cart', 'Order Customer')}
                                     {(showAll || hasMenu('followup')) && subLink('/followup', 'fa-clock', 'Waktu Follow-up')}
+                                    {(showAll || hasMenu('followup') || hasMenu('ordercustomer')) && subLink('/daftar-followup', 'fa-clipboard-check', 'Daftar Follow-up')}
                                     {(showAll || hasMenu('kirimnotif')) && subLink('/kirim-notifikasi', 'fa-paper-plane', 'Kirim Notifikasi')}
                                 </div>
                             )}

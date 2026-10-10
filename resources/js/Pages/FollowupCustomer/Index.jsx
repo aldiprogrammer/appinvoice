@@ -43,7 +43,38 @@ function initOneSignal(appId) {
     return window.__oneSignalPromise;
 }
 
-export default function Index({ jmlCustomer = 0, jmlOrder = 0, followups = [] }) {
+function daysLabel(days) {
+    return `${days} hari`;
+}
+
+function severity(days, waktu) {
+    if (waktu > 0 && days >= waktu * 2) {
+        return { bg: 'linear-gradient(135deg,#ef4444,#dc2626)', label: 'Terlambat' };
+    }
+    return { bg: 'linear-gradient(135deg,#f59e0b,#d97706)', label: 'Perlu Follow-up' };
+}
+
+function waNumber(nohp) {
+    let digits = (nohp || '').replace(/\D/g, '');
+    if (digits.startsWith('0')) digits = '62' + digits.slice(1);
+    return digits;
+}
+
+const ORDER_COLUMNS = [
+    { key: 'tanggal', label: 'Tanggal' },
+    { key: 'no_bon', label: 'No Bon' },
+    { key: 'no_sj', label: 'No SJ' },
+    { key: 'kode_item', label: 'Kode Item' },
+    { key: 'barang', label: 'Barang' },
+    { key: 'gudang', label: 'Gudang' },
+    { key: 'zak', label: 'Zak' },
+    { key: 'kg', label: 'Kg' },
+    { key: 'total_kg', label: 'Total Kg' },
+    { key: 'harga', label: 'Harga' },
+    { key: 'jumlah', label: 'Jumlah' },
+];
+
+export default function Index({ jmlOrder = 0, followups = [], waktu = 0, status = 'Tidak Aktif' }) {
     const onesignalAppId = import.meta.env.VITE_ONESIGNAL_APP_ID;
     const [osReady, setOsReady] = useState(false);
     const [permission, setPermission] = useState(false);
@@ -54,6 +85,9 @@ export default function Index({ jmlCustomer = 0, jmlOrder = 0, followups = [] })
     const [installEvent, setInstallEvent] = useState(null);
     const [isStandalone, setIsStandalone] = useState(false);
     const [isIos, setIsIos] = useState(false);
+    const [search, setSearch] = useState('');
+    const [visible, setVisible] = useState(5);
+    const [detailItem, setDetailItem] = useState(null);
 
     const refreshDiag = (OneSignal) => {
         try {
@@ -173,8 +207,16 @@ export default function Index({ jmlCustomer = 0, jmlOrder = 0, followups = [] })
 
     const active = permission && subscribed;
 
+    const filtered = followups.filter((c) =>
+        (c.nama_customer || '').toLowerCase().includes(search.toLowerCase()) ||
+        (c.nohp || '').toLowerCase().includes(search.toLowerCase()) ||
+        (c.last_barang || '').toLowerCase().includes(search.toLowerCase())
+    );
+    const visibleItems = filtered.slice(0, visible);
+    const hasMore = filtered.length > visible;
+
     const stats = [
-        { label: 'Jumlah Customer', value: jmlCustomer, icon: 'fa-users', grad: 'linear-gradient(135deg,#10b981,#059669)', sub: 'Customer terdaftar' },
+        { label: 'Jumlah Follow-up', value: followups.length, icon: 'fa-headset', grad: 'linear-gradient(135deg,#10b981,#059669)', sub: 'Customer perlu follow-up' },
         { label: 'Jumlah Order', value: jmlOrder, icon: 'fa-shopping-cart', grad: 'linear-gradient(135deg,#3b82f6,#2563eb)', sub: 'Total order masuk' },
     ];
 
@@ -413,6 +455,136 @@ export default function Index({ jmlCustomer = 0, jmlOrder = 0, followups = [] })
                 }
                 .fc-bottomnav a i { display: block; font-size: 18px; margin-bottom: 2px; }
                 .fc-bottomnav a.active { color: #2563eb; }
+                .fc-alert {
+                    display: flex; align-items: flex-start; gap: 10px;
+                    background: #fffbeb; border: 1px solid #fde68a; color: #92400e;
+                    border-radius: 14px; padding: 12px 14px; font-size: .78rem;
+                    line-height: 1.45; margin-bottom: 14px;
+                }
+                .fc-alert i { margin-top: 2px; flex-shrink: 0; }
+                .fc-fl-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+                .fc-fl-count {
+                    flex: 1; border-radius: 16px; padding: 14px 16px;
+                    background: linear-gradient(135deg,#fff1f2,#ffe4e6);
+                    border: 1px solid #fecdd3;
+                }
+                .fc-fl-count-num { font-size: 1.6rem; font-weight: 800; line-height: 1; color: #e11d48; }
+                .fc-fl-count-lbl { font-size: .72rem; font-weight: 600; color: #9f1239; margin-top: 4px; }
+                .fc-fl-pills { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+                .fc-pill {
+                    display: inline-flex; align-items: center; gap: 6px;
+                    border-radius: 999px; padding: 6px 12px; font-size: .72rem; font-weight: 700; white-space: nowrap;
+                }
+                .fc-pill-blue { background: #eff6ff; color: #2563eb; }
+                .fc-pill-green { background: #ecfdf5; color: #059669; }
+                .fc-pill-red { background: #fef2f2; color: #dc2626; }
+                .fc-search { position: relative; margin-bottom: 14px; }
+                .fc-search i {
+                    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+                    color: #94a3b8; font-size: .85rem; pointer-events: none;
+                }
+                .fc-search input {
+                    width: 100%; border: 1px solid rgba(15,23,42,.1); border-radius: 14px;
+                    padding: 11px 14px 11px 38px; font-size: .82rem; color: #0f172a;
+                    background: #fff; outline: none; box-shadow: 0 1px 3px rgba(15,23,42,.04);
+                }
+                .fc-search input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.15); }
+                .fc-fl-list { display: flex; flex-direction: column; gap: 12px; }
+                .fc-fl-card {
+                    background: #fff; border: 1px solid rgba(15,23,42,.07);
+                    border-radius: 18px; padding: 14px 16px;
+                    box-shadow: 0 2px 10px rgba(15,23,42,.04);
+                }
+                .fc-fl-top { display: flex; align-items: flex-start; gap: 12px; }
+                .fc-fl-avatar {
+                    width: 46px; height: 46px; border-radius: 14px; flex-shrink: 0;
+                    display: flex; align-items: center; justify-content: center;
+                    color: #fff; font-weight: 800; font-size: 1.05rem;
+                }
+                .fc-fl-id { flex: 1; min-width: 0; }
+                .fc-fl-name { font-size: .95rem; font-weight: 700; color: #0f172a; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                .fc-fl-hp { font-size: .74rem; color: #64748b; margin: 3px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                .fc-fl-hp i { color: #16a34a; margin-right: 4px; }
+                .fc-sev {
+                    flex-shrink: 0; border-radius: 999px; padding: 5px 10px;
+                    font-size: .68rem; font-weight: 700; color: #fff; white-space: nowrap;
+                }
+                .fc-fl-meta {
+                    display: grid; grid-template-columns: repeat(3, 1fr);
+                    gap: 8px; margin-top: 14px;
+                    background: #f8fafc; border-radius: 12px; padding: 10px 12px;
+                }
+                .fc-fl-mk { display: block; font-size: .65rem; text-transform: uppercase; letter-spacing: .04em; color: #94a3b8; font-weight: 700; }
+                .fc-fl-mv { display: block; font-size: .82rem; font-weight: 700; color: #0f172a; margin-top: 2px; }
+                .fc-fl-last {
+                    margin-top: 10px; font-size: .75rem; color: #475569;
+                    display: flex; align-items: center; gap: 6px;
+                    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+                }
+                .fc-fl-last i { color: #f59e0b; }
+                .fc-fl-actions { display: flex; gap: 8px; margin-top: 14px; }
+                .fc-btn {
+                    flex: 1; border: none; border-radius: 12px; padding: 10px 12px;
+                    font-size: .78rem; font-weight: 700; cursor: pointer; text-decoration: none;
+                    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+                }
+                .fc-btn-detail { background: #eef2ff; color: #4338ca; }
+                .fc-btn-wa { background: #dcfce7; color: #15803d; }
+                .fc-more { display: flex; justify-content: center; margin-top: 16px; }
+                .fc-more-btn {
+                    display: inline-flex; align-items: center; gap: 8px;
+                    border: 1px solid rgba(59,130,246,.3); background: #eff6ff; color: #2563eb;
+                    border-radius: 999px; padding: 11px 22px; font-size: .82rem; font-weight: 700;
+                    cursor: pointer; box-shadow: 0 4px 12px rgba(37,99,235,.12);
+                    transition: background .15s ease, transform .15s ease;
+                }
+                .fc-more-btn:hover { background: #dbeafe; transform: translateY(-1px); }
+                .fc-more-rem { font-size: .68rem; font-weight: 700; background: #2563eb; color: #fff; border-radius: 999px; padding: 2px 8px; }
+                .fc-more-all {
+                    display: inline-flex; align-items: center; gap: 8px;
+                    font-size: .76rem; font-weight: 600; color: #16a34a;
+                    background: #f0fdf4; border: 1px solid #bbf7d0;
+                    border-radius: 999px; padding: 8px 16px;
+                }
+                .fc-modal {
+                    position: fixed; inset: 0; z-index: 1060;
+                    background: rgba(15,23,42,.55);
+                    display: flex; align-items: flex-end; justify-content: center;
+                }
+                .fc-modal-box {
+                    width: 100%; max-width: 480px; max-height: 88vh;
+                    background: #f7f9fc; border-top-left-radius: 24px; border-top-right-radius: 24px;
+                    display: flex; flex-direction: column; overflow: hidden;
+                    animation: fcSlideUp .25s ease;
+                }
+                @keyframes fcSlideUp { from { transform: translateY(30px); opacity: .6; } to { transform: translateY(0); opacity: 1; } }
+                .fc-modal-head {
+                    display: flex; align-items: center; gap: 12px;
+                    padding: 18px 18px 14px; background: linear-gradient(135deg,#2563eb,#1d4ed8);
+                    color: #fff;
+                }
+                .fc-modal-avatar {
+                    width: 44px; height: 44px; border-radius: 14px; flex-shrink: 0;
+                    background: rgba(255,255,255,.2);
+                    display: flex; align-items: center; justify-content: center;
+                    font-weight: 800; font-size: 1.05rem;
+                }
+                .fc-modal-name { font-size: .98rem; font-weight: 700; margin: 0; }
+                .fc-modal-sub { font-size: .72rem; opacity: .85; margin: 2px 0 0; }
+                .fc-modal-close {
+                    margin-left: auto; background: rgba(255,255,255,.16); border: none;
+                    width: 32px; height: 32px; border-radius: 10px; color: #fff;
+                    font-size: 1.3rem; line-height: 1; cursor: pointer; flex-shrink: 0;
+                }
+                .fc-modal-body { padding: 16px 18px; overflow-y: auto; }
+                .fc-modal-foot {
+                    display: flex; gap: 8px; padding: 14px 18px calc(14px + env(safe-area-inset-bottom, 0px));
+                    border-top: 1px solid rgba(15,23,42,.07); background: #fff;
+                }
+                @media (min-width: 481px) {
+                    .fc-modal { align-items: center; }
+                    .fc-modal-box { border-radius: 24px; max-height: 84vh; }
+                }
                 @media (min-width: 481px) {
                     .fc-shell { margin: 24px auto; min-height: calc(100vh - 48px); border-radius: 28px; }
                     .fc-header { border-top-left-radius: 28px; border-top-right-radius: 28px; }
@@ -534,36 +706,181 @@ export default function Index({ jmlCustomer = 0, jmlOrder = 0, followups = [] })
 
                     <div className="fc-section">
                         <div className="fc-section-head">
-                            <h2>Data Follow-up Customer</h2>
-                            <span>{followups.length} data</span>
+                            <h2>Daftar Follow-up Customer</h2>
+                            <span>{followups.length} customer</span>
+                        </div>
+
+                        {status !== 'Aktif' && (
+                            <div className="fc-alert">
+                                <i className="fas fa-exclamation-triangle"></i>
+                                <div>
+                                    Fitur follow-up sedang <b>Tidak Aktif</b>. Daftar di bawah dihitung berdasarkan
+                                    waktu <b>{waktu} hari</b>.
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="fc-fl-toolbar">
+                            <div className="fc-fl-count">
+                                <div className="fc-fl-count-num">{followups.length}</div>
+                                <div className="fc-fl-count-lbl">Perlu di-follow-up</div>
+                            </div>
+                            <div className="fc-fl-pills">
+                                <span className="fc-pill fc-pill-blue"><i className="fas fa-clock"></i> {waktu} hari</span>
+                                <span className={`fc-pill ${status === 'Aktif' ? 'fc-pill-green' : 'fc-pill-red'}`}>
+                                    <i className={`fas ${status === 'Aktif' ? 'fa-check-circle' : 'fa-times-circle'}`}></i> {status}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="fc-search">
+                            <i className="fas fa-search"></i>
+                            <input
+                                type="text"
+                                placeholder="Cari nama, no hp, barang..."
+                                value={search}
+                                onChange={(e) => { setSearch(e.target.value); setVisible(5); }}
+                            />
                         </div>
 
                         {followups.length === 0 ? (
                             <div className="fc-empty">
-                                <div className="fc-empty-icon"><i className="fas fa-clipboard-list"></i></div>
-                                <div className="fc-empty-title">Belum ada data follow-up</div>
-                                <p>Data follow-up customer akan tampil di sini.</p>
+                                <div className="fc-empty-icon"><i className="fas fa-clipboard-check"></i></div>
+                                <div className="fc-empty-title">Tidak ada yang perlu di-follow-up</div>
+                                <p>Semua customer masih dalam jangka waktu follow-up.</p>
+                            </div>
+                        ) : filtered.length === 0 ? (
+                            <div className="fc-empty">
+                                <div className="fc-empty-icon"><i className="fas fa-search"></i></div>
+                                <div className="fc-empty-title">Tidak ada data yang cocok</div>
+                                <p>Coba kata kunci lain untuk pencarian.</p>
                             </div>
                         ) : (
-                            <div className="fc-list">
-                                {followups.map((f, i) => (
-                                    <div key={f.id ?? i} className="fc-item">
-                                        <div className="fc-item-avatar">
-                                            {(f.nama_customer || '?').charAt(0).toUpperCase()}
+                            <div className="fc-fl-list">
+                                {visibleItems.map((item, idx) => {
+                                    const sev = severity(item.days_since, waktu);
+                                    const wa = waNumber(item.nohp);
+                                    return (
+                                        <div key={`${item.nama_customer}-${idx}`} className="fc-fl-card">
+                                            <div className="fc-fl-top">
+                                                <div className="fc-fl-avatar" style={{ background: sev.bg }}>
+                                                    {(item.nama_customer || '?').charAt(0).toUpperCase()}
+                                                </div>
+                                                <div className="fc-fl-id">
+                                                    <p className="fc-fl-name">{item.nama_customer}</p>
+                                                    <p className="fc-fl-hp">
+                                                        <i className="fas fa-phone-alt"></i>{item.nohp || 'No HP belum ada'}
+                                                    </p>
+                                                </div>
+                                                <span className="fc-sev" style={{ background: sev.bg }}>{sev.label}</span>
+                                            </div>
+
+                                            <div className="fc-fl-meta">
+                                                <div>
+                                                    <span className="fc-fl-mk">Order terakhir</span>
+                                                    <span className="fc-fl-mv">{item.last_tanggal}</span>
+                                                </div>
+                                                <div>
+                                                    <span className="fc-fl-mk">Selisih</span>
+                                                    <span className="fc-fl-mv">{daysLabel(item.days_since)}</span>
+                                                </div>
+                                                <div>
+                                                    <span className="fc-fl-mk">Total order</span>
+                                                    <span className="fc-fl-mv">{item.total_orders}×</span>
+                                                </div>
+                                            </div>
+
+                                            {item.last_barang && (
+                                                <div className="fc-fl-last"><i className="fas fa-box"></i> {item.last_barang}</div>
+                                            )}
+
+                                            <div className="fc-fl-actions">
+                                                <button className="fc-btn fc-btn-detail" onClick={() => setDetailItem(item)}>
+                                                    <i className="fas fa-list-ul"></i>Detail
+                                                </button>
+                                                {wa && (
+                                                    <a className="fc-btn fc-btn-wa" href={`https://wa.me/${wa}`} target="_blank" rel="noreferrer">
+                                                        <i className="fab fa-whatsapp"></i>Hubungi
+                                                    </a>
+                                                )}
+                                            </div>
                                         </div>
-                                        <div className="fc-item-body">
-                                            <p className="fc-item-title">{f.nama_customer}</p>
-                                            <p className="fc-item-sub">
-                                                {[f.barang, f.jumlah, f.tanggal].filter(Boolean).join(' · ')}
-                                            </p>
-                                        </div>
-                                        <i className="fas fa-chevron-right" style={{ color: '#cbd5e1' }}></i>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        {filtered.length > 5 && (
+                            <div className="fc-more">
+                                {hasMore ? (
+                                    <button className="fc-more-btn" onClick={() => setVisible(visible + 5)}>
+                                        <i className="fas fa-chevron-circle-down"></i>
+                                        Lihat Lebih Banyak
+                                        <span className="fc-more-rem">{filtered.length - visible} lagi</span>
+                                    </button>
+                                ) : (
+                                    <div className="fc-more-all">
+                                        <i className="fas fa-check-circle"></i> Semua {filtered.length} customer ditampilkan
                                     </div>
-                                ))}
+                                )}
                             </div>
                         )}
                     </div>
                 </div>
+
+                {detailItem && (
+                    <div className="fc-modal" onClick={() => setDetailItem(null)}>
+                        <div className="fc-modal-box" onClick={(e) => e.stopPropagation()}>
+                            <div className="fc-modal-head">
+                                <div className="fc-modal-avatar">
+                                    {(detailItem.nama_customer || '?').charAt(0).toUpperCase()}
+                                </div>
+                                <div style={{ minWidth: 0 }}>
+                                    <p className="fc-modal-name">{detailItem.nama_customer}</p>
+                                    <p className="fc-modal-sub">
+                                        {detailItem.orders.length} order &middot; terakhir {detailItem.last_tanggal}
+                                        {detailItem.nohp ? ` · ${detailItem.nohp}` : ''}
+                                    </p>
+                                </div>
+                                <button type="button" className="fc-modal-close" onClick={() => setDetailItem(null)}>&times;</button>
+                            </div>
+                            <div className="fc-modal-body">
+                                {detailItem.orders.length === 0 ? (
+                                    <div className="text-center text-muted py-4">Belum ada data order</div>
+                                ) : (
+                                    <div className="table-responsive">
+                                        <table className="table table-striped table-sm w-100 mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>No</th>
+                                                    {ORDER_COLUMNS.map((c) => <th key={c.key}>{c.label}</th>)}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {detailItem.orders.map((o, i) => (
+                                                    <tr key={i}>
+                                                        <th>{i + 1}</th>
+                                                        {ORDER_COLUMNS.map((c) => (
+                                                            <td key={c.key} className={c.key === 'barang' ? 'font-weight-bold' : ''}>{o[c.key] || '-'}</td>
+                                                        ))}
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="fc-modal-foot">
+                                {waNumber(detailItem.nohp) && (
+                                    <a className="fc-btn fc-btn-wa" href={`https://wa.me/${waNumber(detailItem.nohp)}`} target="_blank" rel="noreferrer">
+                                        <i className="fab fa-whatsapp"></i>Hubungi
+                                    </a>
+                                )}
+                                <button className="fc-btn fc-btn-detail" onClick={() => setDetailItem(null)}>Tutup</button>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 <nav className="fc-bottomnav">
                     <a href="/follow-up-customer" className="active"><i className="fas fa-headset"></i>Follow-up</a>
