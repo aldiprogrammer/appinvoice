@@ -36,9 +36,7 @@ class NotifikasiController extends Controller
             'contents' => ['en' => $request->pesan],
         ];
 
-        if ($request->filled('url')) {
-            $payload['url'] = $request->url;
-        }
+        $payload['url'] = $request->filled('url') ? $request->url : url('/follow-up-customer');
 
         $response = Http::baseUrl('https://onesignal.com/api/v1')
             ->withHeaders(['Authorization' => 'Basic ' . $restKey])

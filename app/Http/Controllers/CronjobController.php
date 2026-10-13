@@ -23,11 +23,8 @@ class CronjobController extends Controller
             'included_segments' => [config('services.onesignal.segment', 'Total Subscriptions')],
             'headings' => ['en' => 'PTSAN'],
             'contents' => ['en' => 'Sepertinya ada customer yang harus anda follow-up'],
+            'url' => url('/follow-up-customer'),
         ];
-
-        // if ($request->filled('url')) {
-        //     $payload['url'] = $request->url;
-        // }
 
         $response = Http::baseUrl('https://onesignal.com/api/v1')
             ->withHeaders(['Authorization' => 'Basic ' . $restKey])

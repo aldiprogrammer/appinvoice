@@ -60,6 +60,46 @@ function waNumber(nohp) {
     return digits;
 }
 
+const BULAN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+function parseTanggal(value) {
+    const v = (value || '').toString().trim();
+    if (!v) return null;
+    let m = v.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+    if (m) return `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`;
+    m = v.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
+    if (m) return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+    const d = new Date(v);
+    if (!isNaN(d.getTime())) return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return null;
+}
+
+function parseMonth(value) {
+    const full = parseTanggal(value);
+    return full ? full.slice(0, 7) : null;
+}
+
+function formatBulan(ym) {
+    const [y, m] = ym.split('-');
+    return `${BULAN[parseInt(m, 10) - 1]} ${y}`;
+}
+
+const BULAN_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+
+function formatTanggalShort(value) {
+    const full = parseTanggal(value);
+    if (!full) return value || '-';
+    const [y, m, d] = full.split('-');
+    return `${parseInt(d, 10)} ${BULAN_SHORT[parseInt(m, 10) - 1]} ${y}`;
+}
+
+function parseJumlah(value) {
+    const n = parseFloat((value || '').toString().replace(/[^\d.-]/g, ''));
+    return isNaN(n) ? 0 : n;
+}
+
+const angka = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 });
+
 const ORDER_COLUMNS = [
     { key: 'tanggal', label: 'Tanggal' },
     { key: 'no_bon', label: 'No Bon' },
@@ -74,7 +114,7 @@ const ORDER_COLUMNS = [
     { key: 'jumlah', label: 'Jumlah' },
 ];
 
-export default function Index({ jmlOrder = 0, followups = [], waktu = 0, status = 'Tidak Aktif' }) {
+export default function Index({ jmlOrder = 0, followups = [], orders = [], waktu = 0, status = 'Tidak Aktif' }) {
     const onesignalAppId = import.meta.env.VITE_ONESIGNAL_APP_ID;
     const [osReady, setOsReady] = useState(false);
     const [permission, setPermission] = useState(false);
@@ -88,6 +128,11 @@ export default function Index({ jmlOrder = 0, followups = [], waktu = 0, status 
     const [search, setSearch] = useState('');
     const [visible, setVisible] = useState(5);
     const [detailItem, setDetailItem] = useState(null);
+    const [tab, setTab] = useState('followup');
+    const [orderSearch, setOrderSearch] = useState('');
+    const [orderBulan, setOrderBulan] = useState('');
+    const [orderVisible, setOrderVisible] = useState(10);
+    const [orderDetail, setOrderDetail] = useState(null);
 
     const refreshDiag = (OneSignal) => {
         try {
@@ -219,6 +264,56 @@ export default function Index({ jmlOrder = 0, followups = [], waktu = 0, status 
         { label: 'Jumlah Follow-up', value: followups.length, icon: 'fa-headset', grad: 'linear-gradient(135deg,#10b981,#059669)', sub: 'Customer perlu follow-up' },
         { label: 'Jumlah Order', value: jmlOrder, icon: 'fa-shopping-cart', grad: 'linear-gradient(135deg,#3b82f6,#2563eb)', sub: 'Total order masuk' },
     ];
+
+    const orderMonthOptions = Array.from(new Set(orders.map((o) => parseMonth(o.tanggal)).filter(Boolean))).sort().reverse();
+
+    const orderMonthFiltered = orderBulan
+        ? orders.filter((o) => parseMonth(o.tanggal) === orderBulan)
+        : orders;
+
+    const orderFiltered = orderMonthFiltered.filter((o) =>
+        ['tanggal', 'nama_customer', 'no_bon', 'no_sj', 'kode_item', 'barang', 'gudang']
+            .some((k) => (o[k] || '').toString().toLowerCase().includes(orderSearch.toLowerCase()))
+    );
+
+    const orderGroups = (() => {
+        const bySj = new Map();
+        orderFiltered.forEach((o) => {
+            const sj = (o.no_sj || '').trim() || '(Tanpa No SJ)';
+            if (!bySj.has(sj)) {
+                bySj.set(sj, {
+                    key: sj,
+                    no_sj: sj,
+                    nama: (o.nama_customer || '-').trim() || '-',
+                    tanggal: o.tanggal,
+                    totalKg: 0,
+                    items: [],
+                });
+            }
+            const g = bySj.get(sj);
+            g.items.push(o);
+            g.totalKg += parseJumlah(o.total_kg);
+            if ((parseTanggal(o.tanggal) || '') > (parseTanggal(g.tanggal) || '')) {
+                g.tanggal = o.tanggal;
+            }
+            if ((!g.nama || g.nama === '-') && (o.nama_customer || '').trim()) {
+                g.nama = o.nama_customer.trim();
+            }
+        });
+
+        const sortByDate = (a, b) => (parseTanggal(b.tanggal) || '').localeCompare(parseTanggal(a.tanggal) || '');
+
+        return Array.from(bySj.values())
+            .map((g) => {
+                g.items.sort(sortByDate);
+                return { ...g, totalOrders: g.items.length };
+            })
+            .sort(sortByDate);
+    })();
+
+    const orderVisibleGroups = orderGroups.slice(0, orderVisible);
+    const orderHasMore = orderGroups.length > orderVisible;
+    const orderTotalKg = orderMonthFiltered.reduce((sum, o) => sum + parseJumlah(o.total_kg), 0);
 
     return (
         <div className="fc-page">
@@ -530,6 +625,60 @@ export default function Index({ jmlOrder = 0, followups = [], waktu = 0, status 
                 }
                 .fc-btn-detail { background: #eef2ff; color: #4338ca; }
                 .fc-btn-wa { background: #dcfce7; color: #15803d; }
+                .fc-ord-list { display: flex; flex-direction: column; gap: 14px; }
+                .fc-ord-card {
+                    position: relative;
+                    background: #fff;
+                    border: 1px solid rgba(15,23,42,.08);
+                    border-radius: 18px;
+                    box-shadow: 0 6px 18px rgba(15,23,42,.06);
+                    overflow: hidden;
+                    transition: transform .18s ease, box-shadow .18s ease;
+                }
+                .fc-ord-card:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(15,23,42,.10); }
+                .fc-ord-strip { height: 5px; background: linear-gradient(90deg,#3b82f6,#6366f1,#8b5cf6); }
+                .fc-ord-head { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
+                .fc-ord-ic {
+                    width: 46px; height: 46px; border-radius: 14px; flex-shrink: 0;
+                    background: linear-gradient(135deg,#3b82f6,#2563eb);
+                    color: #fff; display: flex; align-items: center; justify-content: center;
+                    font-size: 18px; box-shadow: 0 6px 14px rgba(37,99,235,.32);
+                }
+                .fc-ord-id { flex: 1; min-width: 0; }
+                .fc-ord-name { font-size: .95rem; font-weight: 700; color: #0f172a; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                .fc-ord-sj {
+                    display: inline-flex; align-items: center; gap: 5px; margin-top: 6px;
+                    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+                    font-size: .72rem; font-weight: 700; letter-spacing: .02em;
+                    color: #1d4ed8; background: #eff6ff; border: 1px solid #dbeafe;
+                    border-radius: 999px; padding: 3px 10px; max-width: 100%;
+                }
+                .fc-ord-sj i { font-size: .62rem; opacity: .8; }
+                .fc-ord-sj span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+                .fc-ord-badge {
+                    flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px;
+                    background: linear-gradient(135deg,#eff6ff,#dbeafe); color: #2563eb;
+                    border-radius: 999px; padding: 6px 11px; font-size: .68rem; font-weight: 800; white-space: nowrap;
+                }
+                .fc-ord-meta { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px dashed rgba(15,23,42,.12); }
+                .fc-ord-meta > div { padding: 13px 8px; text-align: center; border-right: 1px dashed rgba(15,23,42,.12); }
+                .fc-ord-meta > div:last-child { border-right: none; }
+                .fc-ord-mk { display: block; font-size: .6rem; text-transform: uppercase; letter-spacing: .05em; color: #94a3b8; font-weight: 700; }
+                .fc-ord-mv {
+                    display: flex; align-items: center; justify-content: center; gap: 5px;
+                    font-size: .84rem; font-weight: 800; color: #0f172a; margin-top: 4px; white-space: nowrap;
+                }
+                .fc-ord-mv i { color: #3b82f6; font-size: .72rem; }
+                .fc-ord-foot { padding: 12px 16px 15px; }
+                .fc-ord-btn {
+                    width: 100%; border: none; cursor: pointer; border-radius: 12px; padding: 11px 14px;
+                    font-size: .8rem; font-weight: 700; color: #fff;
+                    background: linear-gradient(135deg,#3b82f6,#2563eb);
+                    box-shadow: 0 6px 14px rgba(37,99,235,.22);
+                    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+                    transition: transform .15s ease, box-shadow .15s ease;
+                }
+                .fc-ord-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 20px rgba(37,99,235,.3); }
                 .fc-more { display: flex; justify-content: center; margin-top: 16px; }
                 .fc-more-btn {
                     display: inline-flex; align-items: center; gap: 8px;
@@ -546,6 +695,35 @@ export default function Index({ jmlOrder = 0, followups = [], waktu = 0, status 
                     background: #f0fdf4; border: 1px solid #bbf7d0;
                     border-radius: 999px; padding: 8px 16px;
                 }
+                .fc-tabs {
+                    display: flex; gap: 6px; margin-top: 18px;
+                    background: #fff; border: 1px solid rgba(15,23,42,.07);
+                    border-radius: 14px; padding: 5px;
+                    box-shadow: 0 2px 10px rgba(15,23,42,.04);
+                }
+                .fc-tabs button {
+                    flex: 1; border: none; background: transparent; cursor: pointer;
+                    border-radius: 10px; padding: 10px 8px;
+                    font-size: .78rem; font-weight: 700; color: #64748b;
+                    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+                }
+                .fc-tabs button.active {
+                    background: linear-gradient(135deg,#3b82f6,#2563eb); color: #fff;
+                    box-shadow: 0 4px 12px rgba(37,99,235,.25);
+                }
+                .fc-fl-count-blue {
+                    background: linear-gradient(135deg,#eff6ff,#dbeafe);
+                    border-color: #bfdbfe;
+                }
+                .fc-fl-count-blue .fc-fl-count-num { color: #1d4ed8; }
+                .fc-fl-count-blue .fc-fl-count-lbl { color: #1e40af; }
+                .fc-select {
+                    width: 100%; border: 1px solid rgba(15,23,42,.1); border-radius: 14px;
+                    padding: 11px 14px; font-size: .82rem; color: #0f172a;
+                    background: #fff; outline: none; margin-bottom: 10px;
+                    box-shadow: 0 1px 3px rgba(15,23,42,.04);
+                }
+                .fc-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.15); }
                 .fc-modal {
                     position: fixed; inset: 0; z-index: 1060;
                     background: rgba(15,23,42,.55);
@@ -613,6 +791,15 @@ export default function Index({ jmlOrder = 0, followups = [], waktu = 0, status 
                                 <div className="fc-stat-sub">{s.sub}</div>
                             </div>
                         ))}
+                    </div>
+
+                    <div className="fc-tabs">
+                        <button type="button" className={tab === 'followup' ? 'active' : ''} onClick={() => setTab('followup')}>
+                            <i className="fas fa-headset"></i> Follow-up
+                        </button>
+                        <button type="button" className={tab === 'order' ? 'active' : ''} onClick={() => setTab('order')}>
+                            <i className="fas fa-shopping-cart"></i> Data Order
+                        </button>
                     </div>
 
                     {!isStandalone && (installEvent || isIos) && (
@@ -704,128 +891,244 @@ export default function Index({ jmlOrder = 0, followups = [], waktu = 0, status 
                         </details>
                     )}
 
-                    <div className="fc-section">
-                        <div className="fc-section-head">
-                            <h2>Daftar Follow-up Customer</h2>
-                            <span>{followups.length} customer</span>
-                        </div>
+                    {tab === 'followup' && (
+                        <div className="fc-section">
+                            <div className="fc-section-head">
+                                <h2>Daftar Follow-up Customer</h2>
+                                <span>{followups.length} customer</span>
+                            </div>
 
-                        {status !== 'Aktif' && (
-                            <div className="fc-alert">
-                                <i className="fas fa-exclamation-triangle"></i>
-                                <div>
-                                    Fitur follow-up sedang <b>Tidak Aktif</b>. Daftar di bawah dihitung berdasarkan
-                                    waktu <b>{waktu} hari</b>.
+                            {status !== 'Aktif' && (
+                                <div className="fc-alert">
+                                    <i className="fas fa-exclamation-triangle"></i>
+                                    <div>
+                                        Fitur follow-up sedang <b>Tidak Aktif</b>. Daftar di bawah dihitung berdasarkan
+                                        waktu <b>{waktu} hari</b>.
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="fc-fl-toolbar">
+                                <div className="fc-fl-count">
+                                    <div className="fc-fl-count-num">{followups.length}</div>
+                                    <div className="fc-fl-count-lbl">Perlu di-follow-up</div>
+                                </div>
+                                <div className="fc-fl-pills">
+                                    <span className="fc-pill fc-pill-blue"><i className="fas fa-clock"></i> {waktu} hari</span>
+                                    <span className={`fc-pill ${status === 'Aktif' ? 'fc-pill-green' : 'fc-pill-red'}`}>
+                                        <i className={`fas ${status === 'Aktif' ? 'fa-check-circle' : 'fa-times-circle'}`}></i> {status}
+                                    </span>
                                 </div>
                             </div>
-                        )}
 
-                        <div className="fc-fl-toolbar">
-                            <div className="fc-fl-count">
-                                <div className="fc-fl-count-num">{followups.length}</div>
-                                <div className="fc-fl-count-lbl">Perlu di-follow-up</div>
+                            <div className="fc-search">
+                                <i className="fas fa-search"></i>
+                                <input
+                                    type="text"
+                                    placeholder="Cari nama, no hp, barang..."
+                                    value={search}
+                                    onChange={(e) => { setSearch(e.target.value); setVisible(5); }}
+                                />
                             </div>
-                            <div className="fc-fl-pills">
-                                <span className="fc-pill fc-pill-blue"><i className="fas fa-clock"></i> {waktu} hari</span>
-                                <span className={`fc-pill ${status === 'Aktif' ? 'fc-pill-green' : 'fc-pill-red'}`}>
-                                    <i className={`fas ${status === 'Aktif' ? 'fa-check-circle' : 'fa-times-circle'}`}></i> {status}
-                                </span>
-                            </div>
-                        </div>
 
-                        <div className="fc-search">
-                            <i className="fas fa-search"></i>
-                            <input
-                                type="text"
-                                placeholder="Cari nama, no hp, barang..."
-                                value={search}
-                                onChange={(e) => { setSearch(e.target.value); setVisible(5); }}
-                            />
-                        </div>
+                            {followups.length === 0 ? (
+                                <div className="fc-empty">
+                                    <div className="fc-empty-icon"><i className="fas fa-clipboard-check"></i></div>
+                                    <div className="fc-empty-title">Tidak ada yang perlu di-follow-up</div>
+                                    <p>Semua customer masih dalam jangka waktu follow-up.</p>
+                                </div>
+                            ) : filtered.length === 0 ? (
+                                <div className="fc-empty">
+                                    <div className="fc-empty-icon"><i className="fas fa-search"></i></div>
+                                    <div className="fc-empty-title">Tidak ada data yang cocok</div>
+                                    <p>Coba kata kunci lain untuk pencarian.</p>
+                                </div>
+                            ) : (
+                                <div className="fc-fl-list">
+                                    {visibleItems.map((item, idx) => {
+                                        const sev = severity(item.days_since, waktu);
+                                        const wa = waNumber(item.nohp);
+                                        return (
+                                            <div key={`${item.nama_customer}-${idx}`} className="fc-fl-card">
+                                                <div className="fc-fl-top">
+                                                    <div className="fc-fl-avatar" style={{ background: sev.bg }}>
+                                                        {(item.nama_customer || '?').charAt(0).toUpperCase()}
+                                                    </div>
+                                                    <div className="fc-fl-id">
+                                                        <p className="fc-fl-name">{item.nama_customer}</p>
+                                                        <p className="fc-fl-hp">
+                                                            <i className="fas fa-phone-alt"></i>{item.nohp || 'No HP belum ada'}
+                                                        </p>
+                                                    </div>
+                                                    <span className="fc-sev" style={{ background: sev.bg }}>{sev.label}</span>
+                                                </div>
 
-                        {followups.length === 0 ? (
-                            <div className="fc-empty">
-                                <div className="fc-empty-icon"><i className="fas fa-clipboard-check"></i></div>
-                                <div className="fc-empty-title">Tidak ada yang perlu di-follow-up</div>
-                                <p>Semua customer masih dalam jangka waktu follow-up.</p>
-                            </div>
-                        ) : filtered.length === 0 ? (
-                            <div className="fc-empty">
-                                <div className="fc-empty-icon"><i className="fas fa-search"></i></div>
-                                <div className="fc-empty-title">Tidak ada data yang cocok</div>
-                                <p>Coba kata kunci lain untuk pencarian.</p>
-                            </div>
-                        ) : (
-                            <div className="fc-fl-list">
-                                {visibleItems.map((item, idx) => {
-                                    const sev = severity(item.days_since, waktu);
-                                    const wa = waNumber(item.nohp);
-                                    return (
-                                        <div key={`${item.nama_customer}-${idx}`} className="fc-fl-card">
-                                            <div className="fc-fl-top">
-                                                <div className="fc-fl-avatar" style={{ background: sev.bg }}>
-                                                    {(item.nama_customer || '?').charAt(0).toUpperCase()}
+                                                <div className="fc-fl-meta">
+                                                    <div>
+                                                        <span className="fc-fl-mk">Order terakhir</span>
+                                                        <span className="fc-fl-mv">{item.last_tanggal}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span className="fc-fl-mk">Selisih</span>
+                                                        <span className="fc-fl-mv">{daysLabel(item.days_since)}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span className="fc-fl-mk">Total order</span>
+                                                        <span className="fc-fl-mv">{item.total_orders}×</span>
+                                                    </div>
                                                 </div>
-                                                <div className="fc-fl-id">
-                                                    <p className="fc-fl-name">{item.nama_customer}</p>
-                                                    <p className="fc-fl-hp">
-                                                        <i className="fas fa-phone-alt"></i>{item.nohp || 'No HP belum ada'}
-                                                    </p>
-                                                </div>
-                                                <span className="fc-sev" style={{ background: sev.bg }}>{sev.label}</span>
-                                            </div>
 
-                                            <div className="fc-fl-meta">
-                                                <div>
-                                                    <span className="fc-fl-mk">Order terakhir</span>
-                                                    <span className="fc-fl-mv">{item.last_tanggal}</span>
-                                                </div>
-                                                <div>
-                                                    <span className="fc-fl-mk">Selisih</span>
-                                                    <span className="fc-fl-mv">{daysLabel(item.days_since)}</span>
-                                                </div>
-                                                <div>
-                                                    <span className="fc-fl-mk">Total order</span>
-                                                    <span className="fc-fl-mv">{item.total_orders}×</span>
-                                                </div>
-                                            </div>
-
-                                            {item.last_barang && (
-                                                <div className="fc-fl-last"><i className="fas fa-box"></i> {item.last_barang}</div>
-                                            )}
-
-                                            <div className="fc-fl-actions">
-                                                <button className="fc-btn fc-btn-detail" onClick={() => setDetailItem(item)}>
-                                                    <i className="fas fa-list-ul"></i>Detail
-                                                </button>
-                                                {wa && (
-                                                    <a className="fc-btn fc-btn-wa" href={`https://wa.me/${wa}`} target="_blank" rel="noreferrer">
-                                                        <i className="fab fa-whatsapp"></i>Hubungi
-                                                    </a>
+                                                {item.last_barang && (
+                                                    <div className="fc-fl-last"><i className="fas fa-box"></i> {item.last_barang}</div>
                                                 )}
+
+                                                <div className="fc-fl-actions">
+                                                    <button className="fc-btn fc-btn-detail" onClick={() => setDetailItem(item)}>
+                                                        <i className="fas fa-list-ul"></i>Detail
+                                                    </button>
+                                                    {wa && (
+                                                        <a className="fc-btn fc-btn-wa" href={`https://wa.me/${wa}`} target="_blank" rel="noreferrer">
+                                                            <i className="fab fa-whatsapp"></i>Hubungi
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+
+                            {filtered.length > 5 && (
+                                <div className="fc-more">
+                                    {hasMore ? (
+                                        <button className="fc-more-btn" onClick={() => setVisible(visible + 5)}>
+                                            <i className="fas fa-chevron-circle-down"></i>
+                                            Lihat Lebih Banyak
+                                            <span className="fc-more-rem">{filtered.length - visible} lagi</span>
+                                        </button>
+                                    ) : (
+                                        <div className="fc-more-all">
+                                            <i className="fas fa-check-circle"></i> Semua {filtered.length} customer ditampilkan
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {tab === 'order' && (
+                        <div className="fc-section">
+                            <div className="fc-section-head">
+                                <h2>Data Order Customer</h2>
+                                <span>{orderGroups.length} No SJ</span>
+                            </div>
+
+                            <div className="fc-fl-toolbar">
+                                <div className="fc-fl-count fc-fl-count-blue">
+                                    <div className="fc-fl-count-num">{orderMonthFiltered.length}</div>
+                                    <div className="fc-fl-count-lbl">
+                                        Order {orderBulan ? `- ${formatBulan(orderBulan)}` : '(Semua Bulan)'}
+                                    </div>
+                                </div>
+                                <div className="fc-fl-pills">
+                                    <span className="fc-pill fc-pill-blue"><i className="fas fa-weight-hanging"></i> {angka.format(orderTotalKg)} Kg</span>
+                                </div>
+                            </div>
+
+                            <select
+                                className="fc-select"
+                                value={orderBulan}
+                                onChange={(e) => { setOrderBulan(e.target.value); setOrderVisible(10); }}
+                            >
+                                <option value="">Semua Bulan</option>
+                                {orderMonthOptions.map((ym) => (
+                                    <option key={ym} value={ym}>{formatBulan(ym)}</option>
+                                ))}
+                            </select>
+
+                            <div className="fc-search">
+                                <i className="fas fa-search"></i>
+                                <input
+                                    type="text"
+                                    placeholder="Cari customer, barang, no bon..."
+                                    value={orderSearch}
+                                    onChange={(e) => { setOrderSearch(e.target.value); setOrderVisible(10); }}
+                                />
+                            </div>
+
+                            {orderVisibleGroups.length === 0 ? (
+                                <div className="fc-empty">
+                                    <div className="fc-empty-icon"><i className="fas fa-shopping-cart"></i></div>
+                                    <div className="fc-empty-title">Tidak ada data order</div>
+                                    <p>Coba ubah bulan atau kata kunci pencarian.</p>
+                                </div>
+                            ) : (
+                                <div className="fc-ord-list">
+                                    {orderVisibleGroups.map((g) => (
+                                        <div key={g.key} className="fc-ord-card">
+                                            <div className="fc-ord-strip"></div>
+                                            <div className="fc-ord-head">
+                                                <div className="fc-ord-ic"><i className="fas fa-shopping-bag"></i></div>
+                                                <div className="fc-ord-id">
+                                                    <p className="fc-ord-name">{g.nama}</p>
+                                                    <span className="fc-ord-sj">
+                                                        <i className="fas fa-hashtag"></i>
+                                                        <span>{g.no_sj}</span>
+                                                    </span>
+                                                </div>
+                                                <span className="fc-ord-badge">
+                                                    <i className="fas fa-layer-group"></i>{g.items.length} item
+                                                </span>
+                                            </div>
+
+                                            <div className="fc-ord-meta">
+                                                <div>
+                                                    <span className="fc-ord-mk">Tanggal</span>
+                                                    <span className="fc-ord-mv">
+                                                        <i className="fas fa-calendar-day"></i>{formatTanggalShort(g.tanggal)}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <span className="fc-ord-mk">Item</span>
+                                                    <span className="fc-ord-mv">
+                                                        <i className="fas fa-box"></i>{g.items.length}×
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <span className="fc-ord-mk">Total Berat</span>
+                                                    <span className="fc-ord-mv">
+                                                        <i className="fas fa-weight-hanging"></i>{angka.format(g.totalKg)} Kg
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div className="fc-ord-foot">
+                                                <button className="fc-ord-btn" onClick={() => setOrderDetail(g)}>
+                                                    <i className="fas fa-list-ul"></i>Lihat Detail Order
+                                                </button>
                                             </div>
                                         </div>
-                                    );
-                                })}
-                            </div>
-                        )}
+                                    ))}
+                                </div>
+                            )}
 
-                        {filtered.length > 5 && (
-                            <div className="fc-more">
-                                {hasMore ? (
-                                    <button className="fc-more-btn" onClick={() => setVisible(visible + 5)}>
-                                        <i className="fas fa-chevron-circle-down"></i>
-                                        Lihat Lebih Banyak
-                                        <span className="fc-more-rem">{filtered.length - visible} lagi</span>
-                                    </button>
-                                ) : (
-                                    <div className="fc-more-all">
-                                        <i className="fas fa-check-circle"></i> Semua {filtered.length} customer ditampilkan
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </div>
+                            {orderGroups.length > 10 && (
+                                <div className="fc-more">
+                                    {orderHasMore ? (
+                                        <button className="fc-more-btn" onClick={() => setOrderVisible(orderVisible + 10)}>
+                                            <i className="fas fa-chevron-circle-down"></i>
+                                            Lihat Lebih Banyak
+                                            <span className="fc-more-rem">{orderGroups.length - orderVisible} lagi</span>
+                                        </button>
+                                    ) : (
+                                        <div className="fc-more-all">
+                                            <i className="fas fa-check-circle"></i> Semua {orderGroups.length} No SJ ditampilkan
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {detailItem && (
@@ -882,8 +1185,53 @@ export default function Index({ jmlOrder = 0, followups = [], waktu = 0, status 
                     </div>
                 )}
 
+                {orderDetail && (
+                    <div className="fc-modal" onClick={() => setOrderDetail(null)}>
+                        <div className="fc-modal-box" onClick={(e) => e.stopPropagation()}>
+                            <div className="fc-modal-head">
+                                <div className="fc-modal-avatar">
+                                    <i className="fas fa-truck"></i>
+                                </div>
+                                <div style={{ minWidth: 0 }}>
+                                    <p className="fc-modal-name">{orderDetail.no_sj}</p>
+                                    <p className="fc-modal-sub">
+                                        {orderDetail.nama} &middot; {orderDetail.items.length} item &middot; {angka.format(orderDetail.totalKg)} Kg
+                                    </p>
+                                </div>
+                                <button type="button" className="fc-modal-close" onClick={() => setOrderDetail(null)}>&times;</button>
+                            </div>
+                            <div className="fc-modal-body">
+                                <div className="table-responsive">
+                                    <table className="table table-striped table-sm w-100 mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>No</th>
+                                                {ORDER_COLUMNS.map((c) => <th key={c.key}>{c.label}</th>)}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {orderDetail.items.map((o, i) => (
+                                                <tr key={o.id}>
+                                                    <th>{i + 1}</th>
+                                                    {ORDER_COLUMNS.map((c) => (
+                                                        <td key={c.key} className={c.key === 'barang' ? 'font-weight-bold' : ''}>{o[c.key] || '-'}</td>
+                                                    ))}
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div className="fc-modal-foot">
+                                <button className="fc-btn fc-btn-detail" onClick={() => setOrderDetail(null)}>Tutup</button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 <nav className="fc-bottomnav">
-                    <a href="/follow-up-customer" className="active"><i className="fas fa-headset"></i>Follow-up</a>
+                    <a href="#" className={tab === 'followup' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setTab('followup'); }}><i className="fas fa-headset"></i>Follow-up</a>
+                    <a href="#" className={tab === 'order' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setTab('order'); }}><i className="fas fa-shopping-cart"></i>Data Order</a>
                     <a href="/peta-customer"><i className="fas fa-map-marked-alt"></i>Peta</a>
                 </nav>
             </div>
