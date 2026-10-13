@@ -868,29 +868,6 @@ export default function Index({ jmlOrder = 0, followups = [], orders = [], waktu
                         </div>
                     )}
 
-                    {diag && (
-                        <details className="fc-diag">
-                            <summary>Status teknis OneSignal (debug)</summary>
-                            <ul>
-                                <li>App ID dipakai: <b>{diag.appId}</b></li>
-                                <li>URL halaman: <b>{diag.url}</b></li>
-                                <li>Permission: <b>{String(diag.permission)}</b></li>
-                                {diag.isPushSupported !== undefined && (
-                                    <li>Push supported: <b>{String(diag.isPushSupported)}</b></li>
-                                )}
-                                {diag.optedIn !== undefined && (
-                                    <li>OptedIn (subscribed): <b>{String(diag.optedIn)}</b></li>
-                                )}
-                                {diag.subId && (
-                                    <li>Subscription ID: <b>{diag.subId}</b></li>
-                                )}
-                                {diag.error && (
-                                    <li>Error: <b>{diag.error}</b></li>
-                                )}
-                            </ul>
-                        </details>
-                    )}
-
                     {tab === 'followup' && (
                         <div className="fc-section">
                             <div className="fc-section-head">
