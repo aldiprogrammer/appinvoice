@@ -69,7 +69,7 @@
                                 <td class="l">{{ $item->produk }}</td>
                                 <td class="l">{{ $item->kemasan }} Kg</td>
                                 <td class="r">{{ $item->jml_sak }}</td>
-                                <td class="r">{{ number_format($item->total_kg) }}</td>
+                                <td class="r">{{ number_format($item->total_kg, 0, ',', '.') }}</td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -79,7 +79,7 @@
             <div class="rc-total">
                 <div class="rc-total-box">
                     <span>TOTAL KG</span>
-                    <span>{{ number_format($grand_total) }} kg</span>
+                    <span>{{ number_format($grand_total, 0, ',', '.') }} kg</span>
                 </div>
             </div>
 

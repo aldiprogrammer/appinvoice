@@ -62,7 +62,7 @@
                                     <td class="py-[1px]">{{ $item->produk }}</td>
                                     <td class="py-[1px]">{{ $item->kemasan }} Kg</td>
                                     <td class="py-[1px] text-right">{{ $item->jml_sak }}</td>
-                                    <td class="py-[1px] text-right">{{ $item->total_kg }}</td>
+                                    <td class="py-[1px] text-right">{{ number_format($item->total_kg, 0, ',', '.') }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -72,7 +72,7 @@
                 <div class="flex justify-end mt-[2px]">
                     <div class="w-1/3 border-t-[2px] border-b-[2px] border-black py-[1px] flex justify-between font-bold">
                         <span class="text-[14px]">TOTAL KG</span>
-                        <span class="text-[14px]">{{ number_format($grand_total) }} kg</span>
+                        <span class="text-[14px]">{{ number_format($grand_total, 0, ',', '.') }} kg</span>
                     </div>
                 </div>
 
