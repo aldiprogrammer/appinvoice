@@ -1,7 +1,7 @@
 {
-  "name": "PTSAN Follow-up Customer",
-  "short_name": "PTSAN Follow-up",
-  "description": "Follow-up customer & order PTSAN",
+  "name": "PTSAN",
+  "short_name": "PTSAN",
+  "description": "Sistem Informasi PTSAN",
   "id": "/",
   "start_url": "/",
   "scope": "/",

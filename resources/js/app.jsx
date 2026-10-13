@@ -5,7 +5,7 @@ import { createRoot } from 'react-dom/client';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 
 createInertiaApp({
-    title: (title) => title ? `${title} | Invoice PTSAN` : 'Invoice PTSAN',
+    title: (title) => title ? `${title} | PTSAN` : 'PTSAN',
     resolve: (name) =>
         resolvePageComponent(
             `./Pages/${name}.jsx`,
