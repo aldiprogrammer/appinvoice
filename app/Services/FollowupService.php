@@ -109,7 +109,7 @@ class FollowupService
                 continue;
             }
 
-            $customer = $customers->get(mb_strtolower($group['nama']));
+            $customer = $this->cocokkanNama($customers, $group['nama']);
 
             $customerOrders = $group['orders'];
             usort($customerOrders, fn ($a, $b) => $b['_date'] <=> $a['_date']);
@@ -120,6 +120,7 @@ class FollowupService
             }, $customerOrders);
 
             $list[] = [
+                'customer_id' => $customer->id ?? null,
                 'nama_customer' => $group['nama'],
                 'last_tanggal' => $group['last_tanggal'],
                 'last_barang' => $group['last_barang'],
@@ -136,6 +137,43 @@ class FollowupService
         usort($list, fn ($a, $b) => $b['days_since'] <=> $a['days_since']);
 
         return $list;
+    }
+
+    private function cocokkanNama($customers, $nama)
+    {
+        $needle = mb_strtolower(trim((string) $nama));
+
+        if ($needle === '') {
+            return null;
+        }
+
+        $exact = $customers->get($needle);
+
+        if ($exact) {
+            return $exact;
+        }
+
+        $best = null;
+        $bestScore = 0;
+
+        foreach ($customers as $key => $customer) {
+            if ($key === '') {
+                continue;
+            }
+
+            if (str_contains($key, $needle) || str_contains($needle, $key)) {
+                return $customer;
+            }
+
+            similar_text($key, $needle, $persen);
+
+            if ($persen > $bestScore) {
+                $bestScore = $persen;
+                $best = $customer;
+            }
+        }
+
+        return $bestScore >= 65 ? $best : null;
     }
 
     private function parseDate($value): ?Carbon

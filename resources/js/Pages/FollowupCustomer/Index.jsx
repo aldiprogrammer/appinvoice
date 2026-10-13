@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 
 const ONESIGNAL_SDK = 'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';
 
@@ -56,6 +56,7 @@ function severity(days, waktu) {
 
 function waNumber(nohp) {
     let digits = (nohp || '').replace(/\D/g, '');
+    if (digits.length < 9) return '';
     if (digits.startsWith('0')) digits = '62' + digits.slice(1);
     return digits;
 }
@@ -128,6 +129,8 @@ export default function Index({ jmlOrder = 0, followups = [], orders = [], waktu
     const [search, setSearch] = useState('');
     const [visible, setVisible] = useState(5);
     const [detailItem, setDetailItem] = useState(null);
+    const [editHpItem, setEditHpItem] = useState(null);
+    const [addCustomerItem, setAddCustomerItem] = useState(null);
     const [tab, setTab] = useState('followup');
     const [orderSearch, setOrderSearch] = useState('');
     const [orderBulan, setOrderBulan] = useState('');
@@ -598,8 +601,76 @@ export default function Index({ jmlOrder = 0, followups = [], orders = [], waktu
                 }
                 .fc-fl-id { flex: 1; min-width: 0; }
                 .fc-fl-name { font-size: .95rem; font-weight: 700; color: #0f172a; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-                .fc-fl-hp { font-size: .74rem; color: #64748b; margin: 3px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-                .fc-fl-hp i { color: #16a34a; margin-right: 4px; }
+                .fc-fl-hp { margin: 6px 0 0; padding: 0; }
+                .fc-hp-unavail-wrap { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+                .fc-hp-unavail {
+                    display: inline-flex; align-items: center; gap: 6px;
+                    font-size: .72rem; font-style: italic; color: #94a3b8;
+                }
+                .fc-hp-unavail i { color: #94a3b8; }
+                .fc-hp-add {
+                    display: inline-flex; align-items: center; gap: 8px;
+                    padding: 5px 8px 5px 5px; border-radius: 999px;
+                    background: #eef2ff; border: 1px dashed #6366f1; cursor: pointer;
+                    color: #4338ca; box-shadow: 0 3px 10px rgba(99,102,241,.18);
+                    transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+                }
+                .fc-hp-add:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(99,102,241,.28); background: #e0e7ff; }
+                .fc-hp-add:active { transform: translateY(0) scale(.97); }
+                .fc-hp-add-ic {
+                    width: 26px; height: 26px; border-radius: 50%;
+                    background: #6366f1; color: #fff;
+                    display: flex; align-items: center; justify-content: center; font-size: .72rem;
+                }
+                .fc-hp-add-txt { font-size: .72rem; font-weight: 700; }
+                .fc-hp-add-go {
+                    width: 18px; height: 18px; border-radius: 50%;
+                    background: rgba(99,102,241,.2);
+                    display: flex; align-items: center; justify-content: center; font-size: .55rem;
+                }
+                .fc-hp-edit {
+                    display: inline-flex; align-items: center; gap: 8px;
+                    padding: 5px 8px 5px 5px; border-radius: 999px;
+                    background: #fffbeb; border: 1px dashed #f59e0b; cursor: pointer;
+                    color: #b45309; box-shadow: 0 3px 10px rgba(245,158,11,.18);
+                    transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+                }
+                .fc-hp-edit:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(245,158,11,.28); background: #fef3c7; }
+                .fc-hp-edit:active { transform: translateY(0) scale(.97); }
+                .fc-hp-edit-ic {
+                    width: 26px; height: 26px; border-radius: 50%;
+                    background: #f59e0b; color: #fff;
+                    display: flex; align-items: center; justify-content: center; font-size: .72rem;
+                }
+                .fc-hp-edit-txt { font-size: .72rem; font-weight: 700; }
+                .fc-hp-edit-go {
+                    width: 18px; height: 18px; border-radius: 50%;
+                    background: rgba(245,158,11,.2);
+                    display: flex; align-items: center; justify-content: center; font-size: .55rem;
+                }
+                .fc-wa-btn {
+                    display: inline-flex; align-items: center; gap: 8px;
+                    padding: 5px 8px 5px 5px; border-radius: 999px;
+                    background: linear-gradient(135deg,#25d366,#128c7e);
+                    color: #fff; text-decoration: none;
+                    box-shadow: 0 4px 12px rgba(18,140,126,.35);
+                    transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+                }
+                .fc-wa-btn:hover { transform: translateY(-1px); box-shadow: 0 7px 18px rgba(18,140,126,.45); filter: brightness(1.05); }
+                .fc-wa-btn:active { transform: translateY(0) scale(.97); }
+                .fc-wa-btn-ic {
+                    width: 26px; height: 26px; border-radius: 50%;
+                    background: rgba(255,255,255,.22);
+                    display: flex; align-items: center; justify-content: center;
+                    font-size: .8rem;
+                }
+                .fc-wa-btn-txt { font-size: .76rem; font-weight: 700; letter-spacing: .01em; white-space: nowrap; }
+                .fc-wa-btn-go {
+                    width: 18px; height: 18px; border-radius: 50%;
+                    background: rgba(255,255,255,.25);
+                    display: flex; align-items: center; justify-content: center;
+                    font-size: .55rem;
+                }
                 .fc-sev {
                     flex-shrink: 0; border-radius: 999px; padding: 5px 10px;
                     font-size: .68rem; font-weight: 700; color: #fff; white-space: nowrap;
@@ -934,7 +1005,28 @@ export default function Index({ jmlOrder = 0, followups = [], orders = [], waktu
                                                     <div className="fc-fl-id">
                                                         <p className="fc-fl-name">{item.nama_customer}</p>
                                                         <p className="fc-fl-hp">
-                                                            <i className="fas fa-phone-alt"></i>{item.nohp || 'No HP belum ada'}
+                                                            {wa ? (
+                                                                <a className="fc-wa-btn" href={`https://wa.me/${wa}`} target="_blank" rel="noreferrer">
+                                                                    <span className="fc-wa-btn-ic"><i className="fab fa-whatsapp"></i></span>
+                                                                    <span className="fc-wa-btn-txt">{item.nohp}</span>
+                                                                    <span className="fc-wa-btn-go"><i className="fas fa-chevron-right"></i></span>
+                                                                </a>
+                                                            ) : item.nohp ? (
+                                                                <button type="button" className="fc-hp-edit" onClick={() => setEditHpItem(item)}>
+                                                                    <span className="fc-hp-edit-ic"><i className="fas fa-pen"></i></span>
+                                                                    <span className="fc-hp-edit-txt">Nomor HP tidak valid ({item.nohp})</span>
+                                                                    <span className="fc-hp-edit-go"><i className="fas fa-edit"></i></span>
+                                                                </button>
+                                                            ) : (
+                                                                <span className="fc-hp-unavail-wrap">
+                                                                    <span className="fc-hp-unavail"><i className="fas fa-phone-slash"></i> Nomor HP tidak tersedia</span>
+                                                                    <button type="button" className="fc-hp-add" onClick={() => setAddCustomerItem(item)}>
+                                                                        <span className="fc-hp-add-ic"><i className="fas fa-user-plus"></i></span>
+                                                                        <span className="fc-hp-add-txt">Tambah Customer</span>
+                                                                        <span className="fc-hp-add-go"><i className="fas fa-plus"></i></span>
+                                                                    </button>
+                                                                </span>
+                                                            )}
                                                         </p>
                                                     </div>
                                                     <span className="fc-sev" style={{ background: sev.bg }}>{sev.label}</span>
@@ -1206,11 +1298,172 @@ export default function Index({ jmlOrder = 0, followups = [], orders = [], waktu
                     </div>
                 )}
 
+                {editHpItem && <EditHpModal item={editHpItem} onClose={() => setEditHpItem(null)} />}
+
+                {addCustomerItem && <AddCustomerModal item={addCustomerItem} onClose={() => setAddCustomerItem(null)} />}
+
                 <nav className="fc-bottomnav">
                     <a href="#" className={tab === 'followup' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setTab('followup'); }}><i className="fas fa-headset"></i>Follow-up</a>
                     <a href="#" className={tab === 'order' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setTab('order'); }}><i className="fas fa-shopping-cart"></i>Data Order</a>
                     <a href="/peta-customer"><i className="fas fa-map-marked-alt"></i>Peta</a>
                 </nav>
+            </div>
+        </div>
+    );
+}
+
+function AddCustomerModal({ item, onClose }) {
+    const { data, setData, post, processing, errors } = useForm({
+        customer_id: item.customer_id || '',
+        nama: item.nama_customer || '',
+        singkatan: '',
+        nohp: '',
+        alamat: '',
+    });
+
+    const submit = (e) => {
+        e.preventDefault();
+        post('/follow-up-customer/customer', { onSuccess: () => onClose() });
+    };
+
+    return (
+        <div className="fc-modal" onClick={onClose}>
+            <div className="fc-modal-box" onClick={(e) => e.stopPropagation()}>
+                <div className="fc-modal-head">
+                    <div className="fc-modal-avatar">
+                        <i className="fas fa-user-plus"></i>
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                        <p className="fc-modal-name">Tambah Customer</p>
+                        <p className="fc-modal-sub">Simpan ke data customer</p>
+                    </div>
+                    <button type="button" className="fc-modal-close" onClick={onClose}>&times;</button>
+                </div>
+                <form onSubmit={submit}>
+                    <div className="fc-modal-body">
+                        <div className="form-group mb-3">
+                            <label className="small font-weight-bold d-block mb-1" style={{ color: '#475569' }}>
+                                Nama Customer <span style={{ color: '#ef4444' }}>*</span>
+                            </label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                placeholder="Nama customer"
+                                style={{ minHeight: 44 }}
+                                value={data.nama}
+                                onChange={(e) => setData('nama', e.target.value)}
+                                required
+                            />
+                            {errors.nama && <div className="small mt-1" style={{ color: '#ef4444' }}>{errors.nama}</div>}
+                        </div>
+                        <div className="form-group mb-3">
+                            <label className="small font-weight-bold d-block mb-1" style={{ color: '#475569' }}>
+                                Singkatan <span style={{ color: '#ef4444' }}>*</span>
+                            </label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                placeholder="Singkatan customer"
+                                style={{ minHeight: 44 }}
+                                value={data.singkatan}
+                                onChange={(e) => setData('singkatan', e.target.value)}
+                                required
+                            />
+                            {errors.singkatan && <div className="small mt-1" style={{ color: '#ef4444' }}>{errors.singkatan}</div>}
+                        </div>
+                        <div className="form-group mb-3">
+                            <label className="small font-weight-bold d-block mb-1" style={{ color: '#475569' }}>
+                                Nomor HP <span style={{ color: '#ef4444' }}>*</span>
+                            </label>
+                            <input
+                                type="tel"
+                                className="form-control"
+                                placeholder="Contoh: 081234567890"
+                                style={{ minHeight: 44 }}
+                                value={data.nohp}
+                                onChange={(e) => setData('nohp', e.target.value)}
+                                required
+                                autoFocus
+                            />
+                            {errors.nohp && <div className="small mt-1" style={{ color: '#ef4444' }}>{errors.nohp}</div>}
+                        </div>
+                        <div className="form-group mb-0">
+                            <label className="small font-weight-bold d-block mb-1" style={{ color: '#475569' }}>
+                                Alamat (opsional)
+                            </label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                placeholder="Alamat customer"
+                                style={{ minHeight: 44 }}
+                                value={data.alamat}
+                                onChange={(e) => setData('alamat', e.target.value)}
+                            />
+                            {errors.alamat && <div className="small mt-1" style={{ color: '#ef4444' }}>{errors.alamat}</div>}
+                        </div>
+                    </div>
+                    <div className="fc-modal-foot">
+                        <button type="button" className="fc-btn fc-btn-detail" onClick={onClose}>Batal</button>
+                        <button type="submit" disabled={processing} className="fc-btn fc-btn-wa">
+                            {processing && <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true" />}
+                            <i className="fas fa-save mr-1"></i>Simpan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
+
+function EditHpModal({ item, onClose }) {
+    const { data, setData, put, processing, errors } = useForm({
+        nohp: item.nohp || '',
+    });
+
+    const submit = (e) => {
+        e.preventDefault();
+        put(`/follow-up-customer/nohp/${item.customer_id}`, { onSuccess: () => onClose() });
+    };
+
+    return (
+        <div className="fc-modal" onClick={onClose}>
+            <div className="fc-modal-box" onClick={(e) => e.stopPropagation()}>
+                <div className="fc-modal-head">
+                    <div className="fc-modal-avatar">
+                        {(item.nama_customer || '?').charAt(0).toUpperCase()}
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                        <p className="fc-modal-name">Edit Nomor HP</p>
+                        <p className="fc-modal-sub">{item.nama_customer}</p>
+                    </div>
+                    <button type="button" className="fc-modal-close" onClick={onClose}>&times;</button>
+                </div>
+                <form onSubmit={submit}>
+                    <div className="fc-modal-body">
+                        <label className="small font-weight-bold d-block mb-1" style={{ color: '#475569' }}>
+                            Nomor HP <span style={{ color: '#ef4444' }}>*</span>
+                        </label>
+                        <input
+                            type="tel"
+                            className="form-control"
+                            placeholder="Contoh: 081234567890"
+                            style={{ minHeight: 44 }}
+                            value={data.nohp}
+                            onChange={(e) => setData('nohp', e.target.value)}
+                            required
+                            autoFocus
+                        />
+                        {errors.nohp && <div className="small mt-1" style={{ color: '#ef4444' }}>{errors.nohp}</div>}
+                        <p className="small text-muted mt-2 mb-0"><i className="fas fa-info-circle mr-1"></i>Nomor ini akan tersimpan langsung ke data customer.</p>
+                    </div>
+                    <div className="fc-modal-foot">
+                        <button type="button" className="fc-btn fc-btn-detail" onClick={onClose}>Batal</button>
+                        <button type="submit" disabled={processing} className="fc-btn fc-btn-wa">
+                            {processing && <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true" />}
+                            <i className="fas fa-save mr-1"></i>Simpan
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     );

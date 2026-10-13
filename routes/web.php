@@ -28,6 +28,8 @@ Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/peta-customer', [PetaCustomerController::class, 'index'])->name('peta.customer');
 Route::get('/follow-up-customer', [FollowupCustomerController::class, 'index'])->name('followupcustomer');
+Route::put('/follow-up-customer/nohp/{id}', [FollowupCustomerController::class, 'updateNohp'])->name('followupcustomer.nohp');
+Route::post('/follow-up-customer/customer', [FollowupCustomerController::class, 'storeCustomer'])->name('followupcustomer.customer');
 
 Route::get('/cronjob', [CronjobController::class, 'index'])->name('cronjob');
 

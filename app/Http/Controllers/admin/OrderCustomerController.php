@@ -5,6 +5,7 @@ namespace App\Http\Controllers\admin;
 use App\Exports\OrderCustomerTemplate;
 use App\Http\Controllers\Controller;
 use App\Imports\OrderCustomerImport;
+use App\Models\Customer;
 use App\Models\Ordercustomer;
 use App\Services\FollowupService;
 use Illuminate\Http\Request;
@@ -16,6 +17,13 @@ class OrderCustomerController extends Controller
     public function index()
     {
         $orders = Ordercustomer::orderBy('id', 'desc')->get();
+        $customers = Customer::select('nama', 'nohp')->get();
+
+        $orders->transform(function ($order) use ($customers) {
+            $order->nohp = $this->cocokkanNoHp($customers, $order->nama_customer);
+
+            return $order;
+        });
 
         return Inertia::render('OrderCustomer/Index', compact('orders'));
     }
@@ -117,6 +125,50 @@ class OrderCustomerController extends Controller
             'waktu' => $config['waktu'],
             'status' => $config['status'],
         ]);
+    }
+
+    private function cocokkanNoHp($customers, $nama)
+    {
+        $needle = $this->normalizeNama($nama);
+
+        if ($needle === '') {
+            return null;
+        }
+
+        foreach ($customers as $customer) {
+            if ($this->normalizeNama($customer->nama) === $needle) {
+                return $customer->nohp;
+            }
+        }
+
+        $cocok = null;
+        $skor = 0;
+
+        foreach ($customers as $customer) {
+            $hay = $this->normalizeNama($customer->nama);
+
+            if ($hay === '') {
+                continue;
+            }
+
+            if (str_contains($hay, $needle) || str_contains($needle, $hay)) {
+                return $customer->nohp;
+            }
+
+            similar_text($hay, $needle, $persen);
+
+            if ($persen > $skor) {
+                $skor = $persen;
+                $cocok = $customer->nohp;
+            }
+        }
+
+        return $skor >= 65 ? $cocok : null;
+    }
+
+    private function normalizeNama($value)
+    {
+        return strtolower(trim((string) preg_replace('/\s+/', ' ', $value ?? '')));
     }
 
     private function validated(Request $request): array

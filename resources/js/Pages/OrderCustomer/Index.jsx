@@ -19,6 +19,11 @@ const FIELDS = [
 ];
 
 const COLUMNS = FIELDS.map((f) => ({ key: f.key, label: f.label }));
+COLUMNS.splice(
+    COLUMNS.findIndex((c) => c.key === 'nama_customer') + 1,
+    0,
+    { key: 'nohp', label: 'No HP' }
+);
 
 const BULAN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 
