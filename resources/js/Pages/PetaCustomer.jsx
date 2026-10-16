@@ -500,7 +500,7 @@ export default function PetaCustomer({ mappings = [] }) {
 
                 {/* Cari lokasi */}
                 <div style={{ marginTop: 10 }}>
-                    <div className="input-group input-group-sm">
+                    {/* <div className="input-group input-group-sm">
                         <input
                             type="text"
                             className="form-control"
@@ -527,7 +527,7 @@ export default function PetaCustomer({ mappings = [] }) {
                                 <i className={`${locSearching ? 'fas fa-spinner fa-spin' : 'fas fa-search'}`}></i>
                             </button>
                         </div>
-                    </div>
+                    </div> */}
 
                     {locResults.length > 0 && (
                         <div style={{ marginTop: 6, border: '1px solid #e2e8f0', borderRadius: 10, overflow: 'hidden', background: '#fff' }}>
