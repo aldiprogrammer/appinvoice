@@ -8,6 +8,7 @@ const menus = [
     { label: 'Inventaris', desc: 'Stok & data barang', icon: 'fa-boxes', grad: 'linear-gradient(135deg,#a78bfa,#7c3aed)', url: '/login/inventaris' },
     { label: 'Mapping Customer', desc: 'Peta & lokasi toko', icon: 'fa-map-marked-alt', grad: 'linear-gradient(135deg,#3b82f6,#2563eb)', url: '/peta-customer' },
     { label: 'Follow-up Customer', desc: 'Pantau & notifikasi', icon: 'fa-headset', grad: 'linear-gradient(135deg,#2dd4bf,#0d9488)', url: '/follow-up-customer' },
+    { label: 'Sudah Follow-up', desc: 'Riwayat follow-up', icon: 'fa-clipboard-check', grad: 'linear-gradient(135deg,#34d399,#047857)', url: '/follow-up-customer/sudah-followup' },
     { label: 'Admin', desc: 'Pengguna & hak akses', icon: 'fa-user-shield', grad: 'linear-gradient(135deg,#f87171,#dc2626)', url: '/login/admin' },
 ];
 

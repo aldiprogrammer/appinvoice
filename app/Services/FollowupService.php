@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Customer;
 use App\Models\Followup;
+use App\Models\FollowupLog;
 use App\Models\Ordercustomer;
 use Illuminate\Support\Carbon;
 use Throwable;
@@ -109,6 +110,14 @@ class FollowupService
                 continue;
             }
 
+            $keyName = mb_strtolower(trim((string) $group['nama']));
+            $log = FollowupLog::whereRaw('LOWER(customer_name) = ?', [$keyName])
+                ->where('last_tanggal', $group['last_tanggal'])
+                ->exists();
+            if ($log) {
+                continue;
+            }
+
             $customer = $this->cocokkanNama($customers, $group['nama']);
 
             $customerOrders = $group['orders'];
@@ -135,6 +144,45 @@ class FollowupService
         }
 
         usort($list, fn ($a, $b) => $b['days_since'] <=> $a['days_since']);
+
+        return $list;
+    }
+
+    /**
+     * Daftar customer yang sudah ditandai selesai di-follow-up.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function followedUpList(): array
+    {
+        $customers = Customer::get(['nama', 'nohp', 'alamat'])
+            ->keyBy(fn ($c) => mb_strtolower(trim((string) $c->nama)));
+
+        $today = Carbon::today();
+        $logs = FollowupLog::orderByDesc('followed_up_at')->orderByDesc('id')->get();
+
+        $list = [];
+
+        foreach ($logs as $log) {
+            $customer = $this->cocokkanNama($customers, $log->customer_name);
+            $lastDate = $this->parseDate($log->last_tanggal);
+            $daysSince = $lastDate === null
+                ? null
+                : (int) round(($today->getTimestamp() - $lastDate->getTimestamp()) / 86400);
+
+            $list[] = [
+                'id' => $log->id,
+                'customer_id' => $customer->id ?? null,
+                'nama_customer' => $customer->nama ?? $log->customer_name,
+                'last_tanggal' => $log->last_tanggal,
+                'last_no_bon' => $log->last_no_bon,
+                'last_no_sj' => $log->last_no_sj,
+                'followed_up_at' => $log->followed_up_at?->format('d/m/Y H:i'),
+                'days_since' => $daysSince,
+                'nohp' => $customer->nohp ?? null,
+                'alamat' => $customer->alamat ?? null,
+            ];
+        }
 
         return $list;
     }

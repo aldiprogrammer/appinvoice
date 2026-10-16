@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import SudahFollowupList from './SudahFollowupList';
 
 const ONESIGNAL_SDK = 'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';
 
@@ -115,7 +116,7 @@ const ORDER_COLUMNS = [
     { key: 'jumlah', label: 'Jumlah' },
 ];
 
-export default function Index({ jmlOrder = 0, followups = [], orders = [], waktu = 0, status = 'Tidak Aktif' }) {
+export default function Index({ jmlOrder = 0, followups = [], sudahFollowups = [], orders = [], waktu = 0, status = 'Tidak Aktif' }) {
     const onesignalAppId = import.meta.env.VITE_ONESIGNAL_APP_ID;
     const [osReady, setOsReady] = useState(false);
     const [permission, setPermission] = useState(false);
@@ -136,6 +137,7 @@ export default function Index({ jmlOrder = 0, followups = [], orders = [], waktu
     const [orderBulan, setOrderBulan] = useState('');
     const [orderVisible, setOrderVisible] = useState(10);
     const [orderDetail, setOrderDetail] = useState(null);
+    const [markingId, setMarkingId] = useState(null);
 
     const refreshDiag = (OneSignal) => {
         try {
@@ -696,6 +698,8 @@ export default function Index({ jmlOrder = 0, followups = [], orders = [], waktu
                 }
                 .fc-btn-detail { background: #eef2ff; color: #4338ca; }
                 .fc-btn-wa { background: #dcfce7; color: #15803d; }
+                .fc-btn-done { background: #e0f2fe; color: #0369a1; font-size: .66rem; padding: 10px 8px; }
+                .fc-btn-done:disabled { opacity: .6; cursor: not-allowed; }
                 .fc-ord-list { display: flex; flex-direction: column; gap: 14px; }
                 .fc-ord-card {
                     position: relative;
@@ -774,9 +778,10 @@ export default function Index({ jmlOrder = 0, followups = [], orders = [], waktu
                 }
                 .fc-tabs button {
                     flex: 1; border: none; background: transparent; cursor: pointer;
-                    border-radius: 10px; padding: 10px 8px;
-                    font-size: .78rem; font-weight: 700; color: #64748b;
-                    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+                    border-radius: 10px; padding: 10px 6px;
+                    font-size: .72rem; font-weight: 700; color: #64748b;
+                    display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+                    white-space: nowrap;
                 }
                 .fc-tabs button.active {
                     background: linear-gradient(135deg,#3b82f6,#2563eb); color: #fff;
@@ -870,6 +875,9 @@ export default function Index({ jmlOrder = 0, followups = [], orders = [], waktu
                         </button>
                         <button type="button" className={tab === 'order' ? 'active' : ''} onClick={() => setTab('order')}>
                             <i className="fas fa-shopping-cart"></i> Data Order
+                        </button>
+                        <button type="button" className={tab === 'sudah' ? 'active' : ''} onClick={() => setTab('sudah')}>
+                            <i className="fas fa-clipboard-check"></i> Sudah
                         </button>
                     </div>
 
@@ -995,8 +1003,26 @@ export default function Index({ jmlOrder = 0, followups = [], orders = [], waktu
                                 <div className="fc-fl-list">
                                     {visibleItems.map((item, idx) => {
                                         const sev = severity(item.days_since, waktu);
-                                        const wa = waNumber(item.nohp);
-                                        return (
+    const wa = waNumber(item.nohp);
+    const markDone = () => {
+        if (!window.confirm(`Tandai "${item.nama_customer}" sudah di-follow-up?`)) return;
+        setMarkingId(item.nama_customer);
+        router.post(
+            '/follow-up-customer/mark-done',
+            {
+                customer_name: item.nama_customer,
+                last_tanggal: item.last_tanggal,
+                last_no_bon: item.last_no_bon,
+                last_no_sj: item.last_no_sj,
+            },
+            {
+                preserveScroll: true,
+                preserveState: true,
+                onFinish: () => setMarkingId(null),
+            }
+        );
+    };
+    return (
                                             <div key={`${item.nama_customer}-${idx}`} className="fc-fl-card">
                                                 <div className="fc-fl-top">
                                                     <div className="fc-fl-avatar" style={{ background: sev.bg }}>
@@ -1060,6 +1086,14 @@ export default function Index({ jmlOrder = 0, followups = [], orders = [], waktu
                                                             <i className="fab fa-whatsapp"></i>Hubungi
                                                         </a>
                                                     )}
+                                                    <button
+                                                        className="fc-btn fc-btn-done"
+                                                        onClick={() => markDone(item)}
+                                                        disabled={markingId === item.nama_customer}
+                                                    >
+                                                        <i className="fas fa-check"></i>
+                                                        {markingId === item.nama_customer ? 'Menyimpan...' : 'Sudah Follow-up'}
+                                                    </button>
                                                 </div>
                                             </div>
                                         );
@@ -1198,6 +1232,17 @@ export default function Index({ jmlOrder = 0, followups = [], orders = [], waktu
                             )}
                         </div>
                     )}
+
+                    {tab === 'sudah' && (
+                        <div className="fc-section">
+                            <div className="fc-section-head">
+                                <h2>Sudah di Follow-up</h2>
+                                <span>{sudahFollowups.length} customer</span>
+                            </div>
+
+                            <SudahFollowupList followups={sudahFollowups} />
+                        </div>
+                    )}
                 </div>
 
                 {detailItem && (
@@ -1305,7 +1350,8 @@ export default function Index({ jmlOrder = 0, followups = [], orders = [], waktu
                 <nav className="fc-bottomnav">
                     <a href="#" className={tab === 'followup' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setTab('followup'); }}><i className="fas fa-headset"></i>Follow-up</a>
                     <a href="#" className={tab === 'order' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setTab('order'); }}><i className="fas fa-shopping-cart"></i>Data Order</a>
-                    <a href="/peta-customer"><i className="fas fa-map-marked-alt"></i>Peta</a>
+                    <a href="#" className={tab === 'sudah' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setTab('sudah'); }}><i className="fas fa-clipboard-check"></i>Sudah</a>
+                    <Link href="/peta-customer"><i className="fas fa-map-marked-alt"></i>Peta</Link>
                 </nav>
             </div>
         </div>
@@ -1313,7 +1359,7 @@ export default function Index({ jmlOrder = 0, followups = [], orders = [], waktu
 }
 
 function AddCustomerModal({ item, onClose }) {
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors, reset } = useForm({
         customer_id: item.customer_id || '',
         nama: item.nama_customer || '',
         singkatan: '',

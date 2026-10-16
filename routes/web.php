@@ -30,6 +30,9 @@ Route::get('/peta-customer', [PetaCustomerController::class, 'index'])->name('pe
 Route::get('/follow-up-customer', [FollowupCustomerController::class, 'index'])->name('followupcustomer');
 Route::put('/follow-up-customer/nohp/{id}', [FollowupCustomerController::class, 'updateNohp'])->name('followupcustomer.nohp');
 Route::post('/follow-up-customer/customer', [FollowupCustomerController::class, 'storeCustomer'])->name('followupcustomer.customer');
+Route::post('/follow-up-customer/mark-done', [FollowupCustomerController::class, 'markFollowedUp'])->name('followupcustomer.markdone');
+Route::get('/follow-up-customer/sudah-followup', [FollowupCustomerController::class, 'followedUp'])->name('followupcustomer.sudah');
+Route::delete('/follow-up-customer/sudah-followup/{id}', [FollowupCustomerController::class, 'undoFollowedUp'])->name('followupcustomer.undo');
 
 Route::get('/cronjob', [CronjobController::class, 'index'])->name('cronjob');
 
